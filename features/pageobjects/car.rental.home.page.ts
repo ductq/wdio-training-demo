@@ -60,14 +60,17 @@ class CarRentalPageObject extends AbstractPage {
      * a method to encapsule automation code to interact with the page
      * e.g. to submit test data
      */
-    async searchCar (pickupLocation, returnLocation, startDate, startTime, endDate, endTime, country, age) {
+    async searchCar (pLocation, rLocation, startDate, startTime, endDate, endTime, country, age) {
         
         console.log("Pick up Location");
         await this.pickupLocation.click();
-        (await this.pickupLocation).setValue(pickupLocation);
+        (await this.pickupLocation).setValue(pLocation);
+
+        await this.sameLocationCheckBox.click();
        
-        console.log("Phone Number");
-        await this.inputPhoneNumber.setValue(phone);
+        console.log("Pick up Location");
+        await this.returnLocation.click();
+        (await this.returnLocation).setValue(rLocation);
         
         console.log("DOB");
         await this.dateTimePickerDOB.click();
