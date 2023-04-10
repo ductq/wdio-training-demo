@@ -4,6 +4,7 @@ debug
 log
 results
 .DS_Store
+allure-results
 # Logs
 logs
 *.log
