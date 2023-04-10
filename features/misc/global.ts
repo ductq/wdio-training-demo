@@ -1,10 +1,11 @@
 import { setWorldConstructor } from "@wdio/cucumber-framework";
-import chai from "chai"
 
-class CustomVar{
+export class CustomVar{
     testID: string
+    urlE2E: string
     constructor(){
-        this.testID = ""
+        this.testID = "",
+        this.urlE2E = "https://www.airportrentals.com/"
     }
 }
 
