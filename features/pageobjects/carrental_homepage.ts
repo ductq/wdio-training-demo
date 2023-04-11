@@ -20,7 +20,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get sameLocationCheckBox() {
-    return $('label[for="chkbox1"]:first-of-type');
+    return $('(//label[@for="chkbox1"])[1]');
   }
 
   get returnLocation() {
@@ -62,23 +62,41 @@ class CarRentalPageObject extends AbstractPage {
   get submitBtn() {
     return $('//div[@class="section-submit"]/button');
   }
-  
-  async processResultDDL(key: string) {
-    let elements = await $$("[class='select2-results__option'][role='option']");
+
+  async scrollInside(selector, scrollAmount) {
+    browser.execute(
+      (selector, scrollAmount) => {
+        var e = document.querySelector(`${selector}`);
+        e.scrollTop = e.scrollTop + parseInt(`${scrollAmount}`);
+      },
+      selector,
+      scrollAmount
+    );
+  }
+
+  async processResultDDL(element: WebdriverIO.Element, key: string) {
+    await browser.pause(3000);
+    let eleList = await $$("[class='select2-results__option'][role='option']");
     let matchFound = false;
-    let randomIndex = Math.floor(Math.random() * elements.length);
-    for (let ele of elements){
-      console.log(`Element in list: ${await ele.getText()}`);
-    }
+    let randomIndex = Math.floor(Math.random() * eleList.length);
     //await browser.debug();
     if (key === "") {
-        await (elements.at(randomIndex)).click()
-    } 
-    else {
-      elements.forEach(async (element, index) => {
-        await element.getText().then(async (text) => {
+      // console.log(`Element in list at 0: ${await eleList[0].getText()}`);
+      // console.log(`Element in list: ${await eleList[randomIndex].getText()}`);
+      //let resultDDL = await $('//span[@class="select2-results"]'); ul.select2-results__options:nth-child(2)
+      // (//ul[@class="select2-results__options"])[2]
+      let ele = await eleList[randomIndex];
+      console.log(ele.getText());
+      while (!(await ele.isDisplayedInViewport())) {
+        this.scrollInside('ul.select2-results__options:nth-child(2)', 100);
+        await browser.pause(1000);
+      }
+      this.click(ele);
+    } else {
+      eleList.forEach(async (e, index) => {
+        await e.getText().then(async (text) => {
           if (text === key) {
-            await this.click(element);
+            await this.click(e);
             console.log(`Match found at index ${index}: ${text}`);
             matchFound = true;
           }
@@ -91,10 +109,14 @@ class CarRentalPageObject extends AbstractPage {
     }
   }
 
-  async dropDownListHandler(element: WebdriverIO.Element | PromiseLike<WebdriverIO.Element>, input: string, key: string){
+  async dropDownListHandler(
+    element: WebdriverIO.Element,
+    input: string,
+    key: string
+  ) {
     //await this.click(await element);
-    await this.typeInto(await element, input);
-    await this.processResultDDL(key);
+    await this.typeInto(element, input);
+    await this.processResultDDL(element, key);
   }
   /**
    * a method to encapsule automation code to interact with the page
@@ -112,36 +134,40 @@ class CarRentalPageObject extends AbstractPage {
   ) {
     console.log("Pick up Location");
     await this.click(await this.pickupLocation);
-    await this.dropDownListHandler(this.pickupLocationField, pLocation, "");
+    await this.dropDownListHandler(
+      await this.pickupLocationField,
+      pLocation,
+      ""
+    );
     //await browser.debug();
 
     await (await this.sameLocationCheckBox).click();
 
     console.log("Return Location");
-    await this.dropDownListHandler(this.returnLocation, rLocation, "");
+    await this.dropDownListHandler(await this.returnLocation, rLocation, "");
 
     console.log("Start date");
     await (await this.startDate).setValue(sDate);
 
     console.log("Start time");
-    await this.dropDownListHandler(this.startTime, sTime, "");
+    await this.dropDownListHandler(await this.startTime, sTime, "");
 
     console.log("End date");
     await (await this.endDate).setValue(eDate);
 
     console.log("End time");
-    await this.dropDownListHandler(this.endTime, eTime, "");
+    await this.dropDownListHandler(await this.endTime, eTime, "");
 
     await (await this.countryAndAge).click();
 
     console.log("Country");
-    await this.dropDownListHandler(this.country, country, "");
+    await this.dropDownListHandler(await this.country, country, "");
 
     console.log("Age");
     await this.age.setValue(age);
   }
 
-  async submit(){
+  async submit() {
     await browser.pause(5000);
     console.log("Submit");
     await this.submitBtn.click();

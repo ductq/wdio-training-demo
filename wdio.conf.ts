@@ -251,9 +251,9 @@ export const config: Options.Testrunner = {
    * @param {ITestCaseHookParameter} world    world object containing information on pickle and test step
    * @param {Object}                 context  Cucumber World object
    */
-  beforeScenario: function (world, context) {
-    return console.log(`>> Value of world: ${JSON.stringify(world)}`);
-  },
+  // beforeScenario: function (world, context) {
+  //   return console.log(`>> Value of world: ${JSON.stringify(world)}`);
+  // },
   /**
    *
    * Runs before a Cucumber Step.
