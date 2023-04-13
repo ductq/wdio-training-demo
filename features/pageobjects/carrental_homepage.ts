@@ -66,62 +66,29 @@ class CarRentalPageObject extends AbstractPage {
   get submitBtn() {
     return $('//div[@class="section-submit"]/button');
   }
-
-  async scrollInside(selector, scrollAmount) {
-    browser.execute(
-      (selector, scrollAmount) => {
-        var e = document.querySelector(`${selector}`);
-        e.scrollTop = e.scrollTop + parseInt(`${scrollAmount}`);
-      },
-      selector,
-      scrollAmount
+  //Click on the first result of the dynamic drop down list
+  async clickOnFirstResult() {
+    await this.click(
+      await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
     );
   }
-
+  //Click on the random result of the dynamic drop down list
+  async clickOnRandomResult(eList) {
+    let randomIndex = Math.floor(Math.random() * eList.length);
+    await this.click(eList[randomIndex]);
+  }
   /**
    * WIP
-   * Function created in order to process the dropdown list results dynamically 
-   * @param element 
-   * @param key 
+   * Function created in order to process the dropdown list results dynamically
+   * @param element
+   * @param key
    */
   async processResultDDL(element: WebdriverIO.Element, key: string) {
-    await browser.pause(3000);
     let eleList = await $$("[class='select2-results__option'][role='option']");
     let matchFound = false;
-    let randomIndex = Math.floor(Math.random() * eleList.length);
-    //await browser.debug();
     if (key === "") {
-      console.log(`Element in list at 0: ${await eleList[0].getText()}`);
-      console.log(`Element in list: ${await eleList[randomIndex].getText()}`);
-      // await $(
-      //   '((//ul[@class="select2-results__options"])[2])//child::li[0]'
-      // ).click();
-      await this.click(eleList[randomIndex]);
-      //let resultDDL = await $('//span[@class="select2-results"]'); ul.select2-results__options:nth-child(2)
-      // (//ul[@class="select2-results__options"])[2]
-
-      //let ele = await eleList[0];
-      // console.log(ele.getText());
-      // while (!(await ele.isDisplayedInViewport())) {
-      //   this.scrollInside('ul.select2-results__options:nth-child(2)', 100);
-      //   await browser.pause(1000);
-      // }
-      // let ele = await $(
-      //   '((//ul[@class="select2-results__options"])[2])//child::li[2]'
-      // );
-      // console.log(`Displayed? ${await ele.isDisplayed()}`);
-      // console.log(`Text? ${await ele.getText()}`);
-      // console.log(`Loading? ${await ele.isLoading()}`);
-      // console.log(`DisplayedInVP? ${await ele.isDisplayedInViewport()}`);
-      // console.log(`Click? ${await ele.isClickable()}`);
-      // console.log(`Exist? ${await ele.isExisting()}`);
-      // await browser.debug();
-      // this.click(
-      //   await $("#select2-pickup_location_id-ca-results > li:nth-child(6)")
-      // );
-      // console.log(await ele.getText());
-      await browser.pause(60000);
-      await browser.debug();
+      //await this.clickOnRandomResult(eleList);
+      await this.clickOnFirstResult();
     } else {
       eleList.forEach(async (e, index) => {
         await e.getText().then(async (text) => {
@@ -145,7 +112,6 @@ class CarRentalPageObject extends AbstractPage {
     key: string
   ) {
     await this.typeInto(element, input);
-    //await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
     await this.processResultDDL(element, key);
   }
   /**
@@ -163,10 +129,10 @@ class CarRentalPageObject extends AbstractPage {
     age
   ) {
     let chkBoxStatus = await (await $("#chkbox1")).getValue();
-    console.log("Same location checkbox status: " + chkBoxStatus)
+    console.log("Same location checkbox status: " + chkBoxStatus);
     if (parseInt(chkBoxStatus) === 1) {
       await (await this.sameLocationCheckBox).click();
-      await browser.pause(1000)
+      await browser.pause(1000);
     }
 
     console.log("Pick up Location");
@@ -175,7 +141,7 @@ class CarRentalPageObject extends AbstractPage {
       await this.pickupLocationField,
       pLocation,
       ""
-    ); 
+    );
 
     console.log("Return Location");
     await this.click(await this.returnLocation);
@@ -186,32 +152,26 @@ class CarRentalPageObject extends AbstractPage {
     );
 
     console.log("Start date");
-    //await (await this.startDate).setValue(sDate);
+    await (await this.startDate).setValue(sDate);
 
     console.log("Start time");
     await this.click(await this.startTime);
-    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
+    await this.clickOnFirstResult();
     // await this.dropDownListHandler(await this.startTime, sTime, "");
 
     console.log("End date");
-    //await (await this.endDate).setValue(eDate);
+    await (await this.endDate).setValue(eDate);
 
     console.log("End time");
     await this.click(await this.endTime);
-    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
+    await this.clickOnFirstResult();
     // await this.dropDownListHandler(await this.endTime, eTime, "");
 
     await this.click(await this.countryAndAge);
-    
-    browser.debug();
 
     console.log("Country");
     await this.click(await this.country);
-    await this.dropDownListHandler(
-      await this.countryField,
-      country,
-      ""
-    );
+    await this.dropDownListHandler(await this.countryField, country, "");
 
     console.log("Age");
     await this.age.setValue(age);

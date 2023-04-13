@@ -23,7 +23,7 @@ export default class AbstractPage {
     }
     //Type into an element
     async typeInto(ele: WebdriverIO.Element, text: string) {
-        await ele.waitForClickable({timeout: 6000})
+        await ele.waitForExist({timeout: 6000})
         if (!ele.elementId){
             throw Error(ele.error.message)
         }

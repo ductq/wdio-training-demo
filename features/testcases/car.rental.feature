@@ -8,13 +8,13 @@ Feature: Airport Car Rental
     Then I search for the car
 
     Examples: Valid and invalid cases
-      | TestID      | Pickup  | Return    | Start date | Start time | End date | End time | Country   | Age |
-      | TC-E2E-001a | AUS     | DAL       |            | 7:00 am    |          | 9:00 am  | Singapore | 70  |
-      # | TC-E2E-001b | LAX     | SEA       |            | 10:00 pm   |          | 10:00 am | Fin       | 25  |
-      # | TC-E2E-001c | MIA     | JAX       |            | 7:30 am    |          | Noon     | land      | 20  |
-      # | TC-E2E-001d | Vietnam | Singapore |            | 7:30 am    |          | Noon     | Vietnam   | 33  |
-      # | TC-E2E-001e | AUS     | DAL       |            | 7:30 am    |          | 1:00 pm  | Singapore | 10  |
-      # | TC-E2E-001f | AUS     | DAL       |            | 7:30 am    |          | 5:00 pm  | Singapore | 75  |
+      | TestID      | Pickup | Return | Start date  | Start time | End date    | End time | Country   | Age |
+      | TC-E2E-001a | AUS    | DAL    | 30 Apr 2023 | 7:00 am    | 30 Jun 2023 | 9:00 am  | Singapore | 70  |
+  # | TC-E2E-001b | LAX     | SEA       |            | 10:00 pm   |          | 10:00 am | Fin       | 25  |
+  # | TC-E2E-001c | MIA     | JAX       |            | 7:30 am    |          | Noon     | land      | 20  |
+  # | TC-E2E-001d | Vietnam | Singapore |            | 7:30 am    |          | Noon     | Vietnam   | 33  |
+  # | TC-E2E-001e | AUS     | DAL       |            | 7:30 am    |          | 1:00 pm  | Singapore | 10  |
+  # | TC-E2E-001f | AUS     | DAL       |            | 7:30 am    |          | 5:00 pm  | Singapore | 75  |
 
 
   Scenario Outline: <TestID>: As a person from, I want to
