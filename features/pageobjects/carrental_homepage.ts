@@ -13,7 +13,6 @@ class CarRentalPageObject extends AbstractPage {
 
   get pickupLocation() {
     return $("//span[contains(@aria-labelledby, 'select2-pickup_location')]");
-    // return $(`(//*[@class='select2-selection__arrow'])[1]//child::b`);
   }
 
   get pickupLocationField() {
@@ -21,13 +20,11 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get sameLocationCheckBox() {
-    //return $('//input[@name="same_location"]');
     return $('//label[@class="label_chkbox"]');
   }
 
   get returnLocation() {
     return $("//span[contains(@aria-labelledby, 'select2-dropoff_location')]");
-    // return $(`(//*[@class='select2-selection__arrow'])[2]//child::b`);
   }
 
   get returnLocationField() {
@@ -44,12 +41,10 @@ class CarRentalPageObject extends AbstractPage {
 
   get startTime() {
     return $("//*[contains(@id,'select2-start_time')]");
-    // return $(`(//*[@class='select2-selection__arrow'])[3]//child::b`);
   }
 
   get endTime() {
     return $("//*[contains(@id,'select2-end_time')]");
-    // return $(`(//*[@class='select2-selection__arrow'])[4]//child::b`);
   }
 
   get countryAndAge() {
@@ -57,7 +52,11 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get country() {
-    return $("//*[contains(@id,'select2-country')]");
+    return $("//span[contains(@aria-labelledby, 'select2-country')]");
+  }
+
+  get countryField() {
+    return $("//*[contains(@aria-controls,'select2-country')]");
   }
 
   get age() {
@@ -79,6 +78,12 @@ class CarRentalPageObject extends AbstractPage {
     );
   }
 
+  /**
+   * WIP
+   * Function created in order to process the dropdown list results dynamically 
+   * @param element 
+   * @param key 
+   */
   async processResultDDL(element: WebdriverIO.Element, key: string) {
     await browser.pause(3000);
     let eleList = await $$("[class='select2-results__option'][role='option']");
@@ -88,9 +93,10 @@ class CarRentalPageObject extends AbstractPage {
     if (key === "") {
       console.log(`Element in list at 0: ${await eleList[0].getText()}`);
       console.log(`Element in list: ${await eleList[randomIndex].getText()}`);
-      await $(
-        '((//ul[@class="select2-results__options"])[2])//child::li[0]'
-      ).click();
+      // await $(
+      //   '((//ul[@class="select2-results__options"])[2])//child::li[0]'
+      // ).click();
+      await this.click(eleList[randomIndex]);
       //let resultDDL = await $('//span[@class="select2-results"]'); ul.select2-results__options:nth-child(2)
       // (//ul[@class="select2-results__options"])[2]
 
@@ -139,9 +145,8 @@ class CarRentalPageObject extends AbstractPage {
     key: string
   ) {
     await this.typeInto(element, input);
-    //await (await $('((//ul[@class="select2-results__options"])[2])//child::li[2]')).click()
-    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
-    //await this.processResultDDL(element, key);
+    //await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
+    await this.processResultDDL(element, key);
   }
   /**
    * a method to encapsule automation code to interact with the page
@@ -184,28 +189,37 @@ class CarRentalPageObject extends AbstractPage {
     //await (await this.startDate).setValue(sDate);
 
     console.log("Start time");
-    await this.dropDownListHandler(await this.startTime, sTime, "");
+    await this.click(await this.startTime);
+    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
+    // await this.dropDownListHandler(await this.startTime, sTime, "");
 
     console.log("End date");
     //await (await this.endDate).setValue(eDate);
 
     console.log("End time");
-    await this.dropDownListHandler(await this.endTime, eTime, "");
+    await this.click(await this.endTime);
+    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
+    // await this.dropDownListHandler(await this.endTime, eTime, "");
 
-    await (await this.countryAndAge).click();
+    await this.click(await this.countryAndAge);
+    
+    browser.debug();
 
     console.log("Country");
-    await this.dropDownListHandler(await this.country, country, "");
+    await this.click(await this.country);
+    await this.dropDownListHandler(
+      await this.countryField,
+      country,
+      ""
+    );
 
     console.log("Age");
     await this.age.setValue(age);
   }
 
   async submit() {
-    await browser.pause(5000);
     console.log("Submit");
     await this.submitBtn.click();
-    await browser.debug();
   }
 }
 

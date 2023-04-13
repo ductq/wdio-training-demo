@@ -1,6 +1,7 @@
 import { Given, When, Then, setWorldConstructor } from "@wdio/cucumber-framework";
 // import {CustomVar} from "./global.js";
 import HomePage from "../pageobjects/carrental_homepage.js";
+import chai from "chai";
 // setWorldConstructor(CustomVar);
 
 Given(/^I am on the home page of Airport Car Rental$/, async () => {
@@ -21,7 +22,8 @@ Then(
     country,
     age
   ) => {
-    await browser.pause(5000)
+    //Wait for the website to do ist 1st own auto refresh, only happen in chromium-based browser
+    await browser.pause(10000)
     await HomePage.inputCarRentalInfo(
       pickupLocation,
       returnLocation,
@@ -37,4 +39,13 @@ Then(
 
 Then(/^I search for the car$/, async () => {
   await HomePage.submit();
+  browser.waitUntil(() => {
+    return browser.execute(() => {
+      return document.readyState === 'complete';
+    });
+  }, {
+    timeout: 10000, // maximum wait time in milliseconds
+    timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
+  });
+  expect(await browser.getUrl()).toContain("search");
 });
