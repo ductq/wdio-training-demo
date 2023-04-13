@@ -21,6 +21,7 @@ Then(
     country,
     age
   ) => {
+    await browser.pause(5000)
     await HomePage.inputCarRentalInfo(
       pickupLocation,
       returnLocation,

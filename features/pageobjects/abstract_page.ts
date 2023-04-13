@@ -11,6 +11,7 @@ export default class AbstractPage {
         await browser.url(path)
         await browser.maximizeWindow()
     }
+
     //Click on an element
     async click(ele: WebdriverIO.Element) {
         await ele.waitForClickable({timeout: 6000})
@@ -18,6 +19,7 @@ export default class AbstractPage {
             throw Error(ele.error.message)
         }
         await ele.click()
+        await browser.pause(1000)
     }
     //Type into an element
     async typeInto(ele: WebdriverIO.Element, text: string) {
@@ -26,6 +28,7 @@ export default class AbstractPage {
             throw Error(ele.error.message)
         }
         await ele.setValue(text)
+        await browser.pause(1000)
     }
 
 }

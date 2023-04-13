@@ -12,7 +12,8 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get pickupLocation() {
-    return $("//*[contains(@id,'select2-pickup_location')]");
+    return $("//span[contains(@aria-labelledby, 'select2-pickup_location')]");
+    // return $(`(//*[@class='select2-selection__arrow'])[1]//child::b`);
   }
 
   get pickupLocationField() {
@@ -25,7 +26,8 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get returnLocation() {
-    return $("//*[contains(@id,'select2-dropoff_location')]");
+    return $("//span[contains(@aria-labelledby, 'select2-dropoff_location')]");
+    // return $(`(//*[@class='select2-selection__arrow'])[2]//child::b`);
   }
 
   get returnLocationField() {
@@ -42,10 +44,12 @@ class CarRentalPageObject extends AbstractPage {
 
   get startTime() {
     return $("//*[contains(@id,'select2-start_time')]");
+    // return $(`(//*[@class='select2-selection__arrow'])[3]//child::b`);
   }
 
   get endTime() {
     return $("//*[contains(@id,'select2-end_time')]");
+    // return $(`(//*[@class='select2-selection__arrow'])[4]//child::b`);
   }
 
   get countryAndAge() {
@@ -82,33 +86,35 @@ class CarRentalPageObject extends AbstractPage {
     let randomIndex = Math.floor(Math.random() * eleList.length);
     //await browser.debug();
     if (key === "") {
-      // console.log(`Element in list at 0: ${await eleList[0].getText()}`);
-      // console.log(`Element in list: ${await eleList[randomIndex].getText()}`);
+      console.log(`Element in list at 0: ${await eleList[0].getText()}`);
+      console.log(`Element in list: ${await eleList[randomIndex].getText()}`);
+      await $(
+        '((//ul[@class="select2-results__options"])[2])//child::li[0]'
+      ).click();
       //let resultDDL = await $('//span[@class="select2-results"]'); ul.select2-results__options:nth-child(2)
       // (//ul[@class="select2-results__options"])[2]
 
-      // let ele = await eleList[randomIndex];
+      //let ele = await eleList[0];
       // console.log(ele.getText());
       // while (!(await ele.isDisplayedInViewport())) {
       //   this.scrollInside('ul.select2-results__options:nth-child(2)', 100);
       //   await browser.pause(1000);
       // }
-      // this.click(ele);
-      let ele = await $(
-        '((//ul[@class="select2-results__options"])[2])//child::li[2]'
-      );
-      console.log(`Displayed? ${await ele.isDisplayed()}`);
-      console.log(`Text? ${await ele.getText()}`);
-      console.log(`Loading? ${await ele.isLoading()}`);
-      console.log(`DisplayedInVP? ${await ele.isDisplayedInViewport()}`);
-      console.log(`Click? ${await ele.isClickable()}`);
-      console.log(`Exist? ${await ele.isExisting()}`);
-      await browser.debug();
-      this.click(
-        await $("#select2-pickup_location_id-ca-results > li:nth-child(6)")
-      );
+      // let ele = await $(
+      //   '((//ul[@class="select2-results__options"])[2])//child::li[2]'
+      // );
+      // console.log(`Displayed? ${await ele.isDisplayed()}`);
+      // console.log(`Text? ${await ele.getText()}`);
+      // console.log(`Loading? ${await ele.isLoading()}`);
+      // console.log(`DisplayedInVP? ${await ele.isDisplayedInViewport()}`);
+      // console.log(`Click? ${await ele.isClickable()}`);
+      // console.log(`Exist? ${await ele.isExisting()}`);
+      // await browser.debug();
+      // this.click(
+      //   await $("#select2-pickup_location_id-ca-results > li:nth-child(6)")
+      // );
       // console.log(await ele.getText());
-
+      await browser.pause(60000);
       await browser.debug();
     } else {
       eleList.forEach(async (e, index) => {
@@ -132,22 +138,9 @@ class CarRentalPageObject extends AbstractPage {
     input: string,
     key: string
   ) {
-    //await this.click(await element);
-    await (await this.sameLocationCheckBox).click();
-    await browser.pause(1000)
     await this.typeInto(element, input);
-    let ele = await $(
-      '((//ul[@class="select2-results__options"])[2])//child::li[2]'
-    );
-    console.log(`Displayed? ${await ele.isDisplayed()}`);
-    console.log(`Text? ${await ele.getText()}`);
-    console.log(`Loading? ${await ele.isLoading()}`);
-    console.log(`DisplayedInVP? ${await ele.isDisplayedInViewport()}`);
-    console.log(`Click? ${await ele.isClickable()}`);
-    console.log(`Exist? ${await ele.isExisting()}`);
-    await ele.click();
-    await browser.pause(2000)
-    await browser.debug();
+    //await (await $('((//ul[@class="select2-results__options"])[2])//child::li[2]')).click()
+    await this.click(await $('((//ul[@class="select2-results__options"])[2])//child::li[1]'))
     //await this.processResultDDL(element, key);
   }
   /**
@@ -164,28 +157,37 @@ class CarRentalPageObject extends AbstractPage {
     country,
     age
   ) {
+    let chkBoxStatus = await (await $("#chkbox1")).getValue();
+    console.log("Same location checkbox status: " + chkBoxStatus)
+    if (parseInt(chkBoxStatus) === 1) {
+      await (await this.sameLocationCheckBox).click();
+      await browser.pause(1000)
+    }
+
     console.log("Pick up Location");
-    //await this.click(await this.pickupLocation);
+    await this.click(await this.pickupLocation);
     await this.dropDownListHandler(
       await this.pickupLocationField,
       pLocation,
       ""
-    );
-    //await browser.debug();
-
-    await (await this.sameLocationCheckBox).click();
+    ); 
 
     console.log("Return Location");
-    await this.dropDownListHandler(await this.returnLocation, rLocation, "");
+    await this.click(await this.returnLocation);
+    await this.dropDownListHandler(
+      await this.returnLocationField,
+      rLocation,
+      ""
+    );
 
     console.log("Start date");
-    await (await this.startDate).setValue(sDate);
+    //await (await this.startDate).setValue(sDate);
 
     console.log("Start time");
     await this.dropDownListHandler(await this.startTime, sTime, "");
 
     console.log("End date");
-    await (await this.endDate).setValue(eDate);
+    //await (await this.endDate).setValue(eDate);
 
     console.log("End time");
     await this.dropDownListHandler(await this.endTime, eTime, "");
