@@ -32,11 +32,11 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get startDate() {
-    return $(".js-search-box-start-datepicker");
+    return $(".js-datepicker-start");
   }
 
   get endDate() {
-    return $(".js-search-box-end-datepicker");
+    return $(".js-datepicker-end");
   }
 
   get startTime() {
@@ -83,7 +83,7 @@ class CarRentalPageObject extends AbstractPage {
    * @param element
    * @param key
    */
-  async processResultDDL(element: WebdriverIO.Element, key: string) {
+  async processResultDDL(key: string) {
     let eleList = await $$("[class='select2-results__option'][role='option']");
     let matchFound = false;
     if (key === "") {
@@ -112,21 +112,88 @@ class CarRentalPageObject extends AbstractPage {
     key: string
   ) {
     await this.typeInto(element, input);
-    await this.processResultDDL(element, key);
+    await this.processResultDDL(key);
   }
+
+  async dateTimePickerHandler(dateInput: string) {
+    let dateSplit = dateInput.split("-");
+    let year = dateSplit[2].trim();
+    let month = dateSplit[1].trim();
+    let day = dateSplit[0].trim();
+
+    const dateObj = new Date(`${year}-${month}-${day}`);
+    const curDate = new Date();
+    const dateInputTimestamp = dateObj.getTime();
+    const curDateTimestamp = curDate.getTime();
+
+    if (dateInputTimestamp > curDateTimestamp) {
+      const monthName = dateObj.toLocaleString("default", { month: "long" });
+      let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
+      let monthYear = await dateOnCalendar.getText();
+      let yearOnCalendar = ((monthYear.split(" "))[1]).trim();
+
+      if (parseInt(year) >= parseInt(yearOnCalendar) ){
+        await this.click(await dateOnCalendar);
+        if(parseInt(year.substring(0,3)) >= parseInt(yearOnCalendar.substring(0,3))){
+          dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
+          //Click on the year to change to decade form: 12 years selection
+          await this.click(await dateOnCalendar);
+          dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
+          let decade = (await dateOnCalendar.getText()).substring(0,3);
+          let next = await $("(//th[@class='next'])[3]");
+          while(parseInt(year.substring(0,3)) > parseInt(decade)){
+            await this.click(next)
+          }
+          let years = await $$('.year');
+          for(let y of years){
+            if ((await y.getText()) === year ){
+              await this.click(y);
+              
+            }
+          }
+        }
+      }
+      else{
+        console.log("Date is before today!!!")
+      }
+      
+
+    } 
+    else if (dateInputTimestamp < curDateTimestamp) {
+      console.log("The date has already passed.");
+    } 
+    else {
+      console.log("The date is today.");
+    }
+
+    // // Define the array of objects
+    // const array = [{1: 'Jan'}, {2: 'Feb'}, {3: 'March'}];
+    // // Define the value of i
+    // const i = 2;
+
+    // // Find the object in the array that has a key matching i
+    // const obj = array.find(item => item.hasOwnProperty(i));
+
+    // // Get the value associated with the key
+    // const value = obj[i];
+
+    // // Output the result
+    // console.log(value); // Output: "Feb"
+  }
+
   /**
    * a method to encapsule automation code to interact with the page
    * e.g. to submit test data
    */
   async inputCarRentalInfo(
-    pLocation,
-    rLocation,
-    sDate,
-    sTime,
-    eDate,
-    eTime,
-    country,
-    age
+    pLocation: string,
+    rLocation: string,
+    sDate: string,
+    sTime: any,
+    eDate: string,
+    eTime: any,
+    country: string,
+    age: string | number
   ) {
     let chkBoxStatus = await (await $("#chkbox1")).getValue();
     console.log("Same location checkbox status: " + chkBoxStatus);
@@ -152,7 +219,10 @@ class CarRentalPageObject extends AbstractPage {
     );
 
     console.log("Start date");
-    await (await this.startDate).setValue(sDate);
+    await this.click(await this.startDate);
+    await this.dateTimePickerHandler(sDate);
+
+    await browser.debug();
 
     console.log("Start time");
     await this.click(await this.startTime);
@@ -160,7 +230,8 @@ class CarRentalPageObject extends AbstractPage {
     // await this.dropDownListHandler(await this.startTime, sTime, "");
 
     console.log("End date");
-    await (await this.endDate).setValue(eDate);
+    await this.click(await this.endDate);
+    await this.dateTimePickerHandler(eDate);
 
     console.log("End time");
     await this.click(await this.endTime);

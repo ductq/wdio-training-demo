@@ -44,7 +44,7 @@ Then(/^I search for the car$/, async () => {
       return document.readyState === 'complete';
     });
   }, {
-    timeout: 10000, // maximum wait time in milliseconds
+    timeout: 7000, // maximum wait time in milliseconds
     timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
   });
   expect(await browser.getUrl()).toContain("search");
