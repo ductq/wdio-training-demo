@@ -85,24 +85,16 @@ class CarRentalPageObject extends AbstractPage {
    */
   async processResultDDL(key: string) {
     let eleList = await $$("[class='select2-results__option'][role='option']");
-    let matchFound = false;
     if (key === "") {
       //await this.clickOnRandomResult(eleList);
       await this.clickOnFirstResult();
     } else {
-      eleList.forEach(async (e, index) => {
-        await e.getText().then(async (text) => {
-          if (text === key) {
-            await this.click(e);
-            console.log(`Match found at index ${index}: ${text}`);
-            matchFound = true;
-          }
-        });
-
-        if (matchFound) {
-          return false; // exit the loop if match is found
+      for (let e of eleList){
+        if ((await e.getText()) === key) {
+          await this.click(e);
+          break;
         }
-      });
+      }
     }
   }
 
@@ -111,7 +103,9 @@ class CarRentalPageObject extends AbstractPage {
     input: string,
     key: string
   ) {
-    await this.typeInto(element, input);
+    if (key === "") {
+      await this.typeInto(element, input);
+    }
     await this.processResultDDL(key);
   }
 
@@ -130,39 +124,55 @@ class CarRentalPageObject extends AbstractPage {
       const monthName = dateObj.toLocaleString("default", { month: "long" });
       let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
       let monthYear = await dateOnCalendar.getText();
-      let yearOnCalendar = ((monthYear.split(" "))[1]).trim();
+      let yearOnCalendar = monthYear.split(" ")[1].trim();
 
-      if (parseInt(year) >= parseInt(yearOnCalendar) ){
+      if (parseInt(year) >= parseInt(yearOnCalendar)) {
         await this.click(await dateOnCalendar);
-        if(parseInt(year.substring(0,3)) >= parseInt(yearOnCalendar.substring(0,3))){
+        if (
+          parseInt(year.substring(0, 3)) >=
+          parseInt(yearOnCalendar.substring(0, 3))
+        ) {
           dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
           //Click on the year to change to decade form: 12 years selection
           await this.click(await dateOnCalendar);
           dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
-          let decade = (await dateOnCalendar.getText()).substring(0,3);
+          let decade = (await dateOnCalendar.getText()).substring(0, 3);
           let next = await $("(//th[@class='next'])[3]");
-          while(parseInt(year.substring(0,3)) > parseInt(decade)){
-            await this.click(next)
+          while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
+            await this.click(next);
           }
-          let years = await $$('.year');
-          for(let y of years){
-            if ((await y.getText()) === year ){
+          let years = await $$(".year");
+          for (let y of years) {
+            if ((await y.getText()) === year) {
               await this.click(y);
-              
+              break;
+            }
+          }
+          let months = await $$(".month");
+          for (let m of months) {
+            if ((await m.getText()) === monthName.substring(0, 3)) {
+              await this.click(m);
+              break;
+            }
+          }
+          let days = (await $$("tbody td")).filter(
+            async (tdElement) =>
+              (await tdElement.getAttribute("class")) === "day"
+          );
+          console.log(parseInt(day));
+          for (let d of days) {
+            if (parseInt(await d.getText()) === parseInt(day)) {
+              await this.click(d);
+              break;
             }
           }
         }
+      } else {
+        console.log("Date is before today!!!");
       }
-      else{
-        console.log("Date is before today!!!")
-      }
-      
-
-    } 
-    else if (dateInputTimestamp < curDateTimestamp) {
+    } else if (dateInputTimestamp < curDateTimestamp) {
       console.log("The date has already passed.");
-    } 
-    else {
+    } else {
       console.log("The date is today.");
     }
 
@@ -222,12 +232,10 @@ class CarRentalPageObject extends AbstractPage {
     await this.click(await this.startDate);
     await this.dateTimePickerHandler(sDate);
 
-    await browser.debug();
-
     console.log("Start time");
     await this.click(await this.startTime);
-    await this.clickOnFirstResult();
-    // await this.dropDownListHandler(await this.startTime, sTime, "");
+    //await this.clickOnFirstResult();
+    await this.dropDownListHandler(await this.startTime, "", sTime.trim());
 
     console.log("End date");
     await this.click(await this.endDate);
@@ -235,8 +243,8 @@ class CarRentalPageObject extends AbstractPage {
 
     console.log("End time");
     await this.click(await this.endTime);
-    await this.clickOnFirstResult();
-    // await this.dropDownListHandler(await this.endTime, eTime, "");
+    //await this.clickOnFirstResult();
+    await this.dropDownListHandler(await this.endTime,"", eTime.trim());
 
     await this.click(await this.countryAndAge);
 
