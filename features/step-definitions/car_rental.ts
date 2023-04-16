@@ -8,6 +8,8 @@ Given(/^I am on the home page of Airport Car Rental$/, async () => {
   //console.log(`Test ID: ${this.testID}`);
   //console.log(`Test ID: ${this.urlE2E}`);
   await HomePage.navigateTo("https://www.airportrentals.com/");
+  await browser.refresh();
+  await browser.pause(2000);
 });
 
 Then(
@@ -22,8 +24,6 @@ Then(
     country,
     age
   ) => {
-    //Wait for the website to do ist 1st own auto refresh, only happen in chromium-based browser
-    await browser.pause(10000)
     await HomePage.inputCarRentalInfo(
       pickupLocation,
       returnLocation,
@@ -44,7 +44,7 @@ Then(/^I search for the car$/, async () => {
       return document.readyState === 'complete';
     });
   }, {
-    timeout: 7000, // maximum wait time in milliseconds
+    timeout: 10000, // maximum wait time in milliseconds
     timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
   });
   expect(await browser.getUrl()).toContain("search");

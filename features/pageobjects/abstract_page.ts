@@ -19,7 +19,7 @@ export default class AbstractPage {
       throw Error(ele.error.message);
     }
     await ele.click();
-    await browser.pause(1000);
+    await browser.pause(500);
   }
   //Type into an element
   async typeInto(ele: WebdriverIO.Element, text: string) {
@@ -28,7 +28,7 @@ export default class AbstractPage {
       throw Error(ele.error.message);
     }
     await ele.setValue(text);
-    await browser.pause(1000);
+    await browser.pause(500);
   }
 
 }

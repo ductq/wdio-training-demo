@@ -10,11 +10,9 @@
     "chai": "^4.3.7",
     "chromedriver": "^112.0.0",
     "geckodriver": "^3.2.0",
-    "msedgedriver": "^91.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.3",
     "wdio-chromedriver-service": "^8.1.1",
-    "wdio-edgedriver-service": "^2.1.2",
     "wdio-geckodriver-service": "^4.1.1"
   },
   "scripts": {

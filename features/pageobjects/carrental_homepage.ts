@@ -89,7 +89,7 @@ class CarRentalPageObject extends AbstractPage {
       //await this.clickOnRandomResult(eleList);
       await this.clickOnFirstResult();
     } else {
-      for (let e of eleList){
+      for (let e of eleList) {
         if ((await e.getText()) === key) {
           await this.click(e);
           break;
@@ -175,26 +175,8 @@ class CarRentalPageObject extends AbstractPage {
     } else {
       console.log("The date is today.");
     }
-
-    // // Define the array of objects
-    // const array = [{1: 'Jan'}, {2: 'Feb'}, {3: 'March'}];
-    // // Define the value of i
-    // const i = 2;
-
-    // // Find the object in the array that has a key matching i
-    // const obj = array.find(item => item.hasOwnProperty(i));
-
-    // // Get the value associated with the key
-    // const value = obj[i];
-
-    // // Output the result
-    // console.log(value); // Output: "Feb"
   }
 
-  /**
-   * a method to encapsule automation code to interact with the page
-   * e.g. to submit test data
-   */
   async inputCarRentalInfo(
     pLocation: string,
     rLocation: string,
@@ -205,13 +187,6 @@ class CarRentalPageObject extends AbstractPage {
     country: string,
     age: string | number
   ) {
-    let chkBoxStatus = await (await $("#chkbox1")).getValue();
-    console.log("Same location checkbox status: " + chkBoxStatus);
-    if (parseInt(chkBoxStatus) === 1) {
-      await (await this.sameLocationCheckBox).click();
-      await browser.pause(1000);
-    }
-
     console.log("Pick up Location");
     await this.click(await this.pickupLocation);
     await this.dropDownListHandler(
@@ -219,6 +194,12 @@ class CarRentalPageObject extends AbstractPage {
       pLocation,
       ""
     );
+
+    let chkBoxStatus = await (await this.returnLocation).isDisplayed();
+    console.log("Same location checkbox status: " + chkBoxStatus);
+    if (!chkBoxStatus) {
+      await (await this.sameLocationCheckBox).click();
+    }
 
     console.log("Return Location");
     await this.click(await this.returnLocation);
@@ -244,9 +225,13 @@ class CarRentalPageObject extends AbstractPage {
     console.log("End time");
     await this.click(await this.endTime);
     //await this.clickOnFirstResult();
-    await this.dropDownListHandler(await this.endTime,"", eTime.trim());
+    await this.dropDownListHandler(await this.endTime, "", eTime.trim());
 
-    await this.click(await this.countryAndAge);
+    chkBoxStatus = await (await this.country).isDisplayed();
+    console.log("Same location checkbox status: " + chkBoxStatus);
+    if (!chkBoxStatus) {
+      await this.click(await this.countryAndAge);
+    }
 
     console.log("Country");
     await this.click(await this.country);
