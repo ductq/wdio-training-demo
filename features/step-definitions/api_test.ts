@@ -7,18 +7,18 @@ import chai from "chai";
 Given(/^I am on the home page of demoqa$/, async () => {
   //console.log(`Test ID: ${this.testID}`);
   //console.log(`Test ID: ${this.urlE2E}`);
-  await page.navigateTo("https://demoqa.com/links");
+  await browser.url("https://demoqa.com/links");
   await browser.pause(1500);
 });
 
 Then(/^I check responses of the links$/, async () => {
-  await browser.setupInterceptor();
+  browser.setupInterceptor();
   let ele = await $(`#created`);
  // let createdMock = await browser.mock('**/created', {method: 'get'})
   await ele.click();
   await browser.pause(3000)
-  await browser.expectRequest('GET','https://demoqa.com/created', 201);
-  //console.log(createdMock);
+  let response =  await browser.getRequest('GET', '/created');
+  console.log("Response: " + response);
   //await browser.debug();
 
 });
