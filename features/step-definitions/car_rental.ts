@@ -39,7 +39,7 @@ Then(
 
 Then(/^I search for the car$/, async () => {
   await HomePage.submit();
-  browser.waitUntil(() => {
+  await browser.waitUntil(() => {
     return browser.execute(() => {
       return document.readyState === 'complete';
     });

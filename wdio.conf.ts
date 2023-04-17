@@ -1,5 +1,7 @@
 import type { Options } from "@wdio/types";
 import fs from "fs"
+let headless = process.env.HEADLESS;
+let debug = process.env.DEBUG
 
 export const config: Options.Testrunner = {
   //
@@ -68,6 +70,18 @@ export const config: Options.Testrunner = {
       //
       browserName: "chrome",
       acceptInsecureCerts: true,
+      "goog:chromeOptions": {
+        args:
+          headless && headless.toUpperCase() === "Y"
+            ? [
+                "--disable-web-security",
+                "--headless",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+                "--window-size=1920,1080",
+              ]
+            : []
+      },
       // If outputDir is provided WebdriverIO can capture driver session logs
       // it is possible to configure which logTypes to include/exclude.
       // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
@@ -94,7 +108,7 @@ export const config: Options.Testrunner = {
   // Define all options that are relevant for the WebdriverIO instance here
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: "info",
+  logLevel: debug && debug.toUpperCase() === "Y" ? "info" : "error",
   //
   // Set specific log levels per logger
   // loggers:
