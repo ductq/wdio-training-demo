@@ -1,13 +1,13 @@
 import { Given, Then } from "@wdio/cucumber-framework";
 import fs from "fs";
-import HomePage from "../pageobjects/carrental_homepage.js";
+import page from "../pageobjects/carrental_homepage.js";
 import chai from "chai";
 // setWorldConstructor(CustomVar);
 
 Given(/^I am on the home page of ACR$/, async () => {
   //console.log(`Test ID: ${this.testID}`);
   //console.log(`Test ID: ${this.urlE2E}`);
-  await HomePage.navigateTo("https://www.airportrentals.com/");
+  await page.navigateTo("https://www.airportrentals.com/");
   await browser.refresh();
   await browser.pause(2000);
 });

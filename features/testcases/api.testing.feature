@@ -1,11 +1,10 @@
-Feature: Ajax Demo
+Feature: API testing on demoqa.com
+    @api @smoke
+    Scenario Outline: <TestID>: I want to check the reponses from the demo site
 
-  @test
-  Scenario Outline: <TestID>: As a user, I want to interact with ajax elements
+        Given I am on the home page of demoqa
+        Then I check responses of the links
 
-    Given I am on the home page of playground
-    Then I interact with Ajax
-
-    Examples: 
-      | TestID    |
-      | TC-DC-001 |
+        Examples:
+            | TestID     |
+            | TC-API-001 |

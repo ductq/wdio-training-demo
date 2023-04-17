@@ -6,7 +6,8 @@
             "node",
             "@wdio/globals/types",
             "expect-webdriverio",
-            "@wdio/cucumber-framework"
+            "@wdio/cucumber-framework",
+            "wdio-intercept-service"
         ],
         "target": "es2022",
         "esModuleInterop": true
