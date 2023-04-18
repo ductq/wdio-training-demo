@@ -80,8 +80,7 @@ class CarRentalPageObject extends AbstractPage {
   /**
    * WIP
    * Function created in order to process the dropdown list results dynamically
-   * @param element
-   * @param key
+   * @param key (string) matching string
    */
   async processResultDDL(key: string) {
     let eleList = await $$("[class='select2-results__option'][role='option']");

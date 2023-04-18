@@ -22,6 +22,7 @@
     "demo-all": "wdio run ./wdio.conf.ts && set DEBUG=N && set HEADLESS=N",
     "test:exercise": "set DEBUG=Y && set HEADLESS=Y && wdio run ./wdio.conf.ts --cucumberOpts.tagExpression='@exercise' > output.txt",
     "test:e2e": "set DEBUG=N && set HEADLESS=N && wdio run ./wdio.conf.ts --cucumberOpts.tagExpression='@e2e'",
-    "test:api": "set DEBUG=N && set HEADLESS=N && wdio run ./wdio.conf.ts --cucumberOpts.tagExpression='@api'"
+    "test:api": "set DEBUG=N && set HEADLESS=N && wdio run ./wdio.conf.ts --cucumberOpts.tagExpression='@api'",
+    "test:test": "set DEBUG=N && set HEADLESS=N && wdio run ./wdio.conf.ts --cucumberOpts.tagExpression='@test'"
   }
 }
