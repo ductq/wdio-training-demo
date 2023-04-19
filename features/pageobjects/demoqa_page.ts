@@ -32,8 +32,8 @@ class DemoQAPageObject extends AbstractPage {
     let expectedText = await (await this.statusTextFromPage).getText();
     let responseCode = request.response.statusCode;
     let responseText = getReasonPhrase(responseCode);
-    console.log("Status code: " + responseCode);
-    console.log("Status text: " + responseText);
+    console.log(`Status code: ${CYAN}${responseCode}${DEFAULT}`);
+    console.log(`Status text: ${CYAN}${responseText}${DEFAULT}`);
     this.responseCheck(responseCode,expectedCode);
     this.responseCheck(responseText,expectedText);
     await browser.disableInterceptor();

@@ -8,6 +8,7 @@ const RED = `\x1b[31m`;
 const GREEN = `\x1b[32m`;
 const CYAN = `\x1b[36m`;
 const DEFAULT = `\x1b[0m`;
+let TestID = ""
 
 export const config: Options.Testrunner = {
   //
@@ -263,6 +264,10 @@ export const config: Options.Testrunner = {
    */
   beforeSession: function (config, capabilities, specs, cid) {
     dns.setDefaultResultOrder("ipv4first");
+    global.RED = RED;
+    global.GREEN = GREEN;
+    global.CYAN = CYAN;
+    global.DEFAULT = DEFAULT;
   },
   /**
    * Gets executed before test execution begins. At this point you can access to all global
@@ -305,6 +310,8 @@ export const config: Options.Testrunner = {
         `Error getting test ID for current case ${world.pickle.name}`
       );
     }
+    TestID = browser.options.testID;
+    global.TestID = TestID;
     //return console.log(`>> Value of world: ${JSON.stringify(world)}`);
     return console.log(`${GREEN}>> Starting test case: ${browser.options.testID} ${DEFAULT}`);
   },

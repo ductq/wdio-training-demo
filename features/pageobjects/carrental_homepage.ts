@@ -241,6 +241,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async submit() {
+    console.log(TestID);
     console.log("Submit");
     await this.submitBtn.click();
     await browser.waitUntil(() => {
