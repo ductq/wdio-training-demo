@@ -1,8 +1,13 @@
+
 import type { Options } from "@wdio/types";
-import fs from "fs"
+import fs from "fs";
 let headless = process.env.HEADLESS;
 let debug = process.env.DEBUG;
-import dns from 'node:dns';
+import dns from "node:dns";
+const RED = `\x1b[31m`;
+const GREEN = `\x1b[32m`;
+const CYAN = `\x1b[36m`;
+const DEFAULT = `\x1b[0m`;
 
 export const config: Options.Testrunner = {
   //
@@ -149,7 +154,7 @@ export const config: Options.Testrunner = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ["chromedriver", "geckodriver" , "intercept" ],
+  services: ["chromedriver","intercept"],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
@@ -171,7 +176,17 @@ export const config: Options.Testrunner = {
   // Test reporter for stdout.
   // The only one supported by default is 'dot'
   // see also: https://webdriver.io/docs/dot-reporter
-  reporters: ["spec", ["allure", { outputDir: "allure-results" }]],
+  reporters: [
+    "spec",
+    [
+      "allure",
+      {
+        outputDir: "allure-results",
+        disableWebdriverStepsReporting: true,
+        useCucumberStepReporter: true,
+      },
+    ],
+  ],
 
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
@@ -214,8 +229,8 @@ export const config: Options.Testrunner = {
    * @param {Array.<Object>} capabilities list of capabilities details
    */
   onPrepare: function (config, capabilities) {
-    if(fs.existsSync("./allure-results")){
-        fs.rmdirSync("./allure-results", {recursive: true}) 
+    if (fs.existsSync("./allure-results")) {
+      fs.rmdirSync("./allure-results", { recursive: true });
     }
   },
   /**
@@ -247,7 +262,7 @@ export const config: Options.Testrunner = {
    * @param {String} cid worker id (e.g. 0-0)
    */
   beforeSession: function (config, capabilities, specs, cid) {
-    dns.setDefaultResultOrder('ipv4first');
+    dns.setDefaultResultOrder("ipv4first");
   },
   /**
    * Gets executed before test execution begins. At this point you can access to all global
@@ -280,9 +295,19 @@ export const config: Options.Testrunner = {
    * @param {ITestCaseHookParameter} world    world object containing information on pickle and test step
    * @param {Object}                 context  Cucumber World object
    */
-  // beforeScenario: function (world, context) {
-  //   return console.log(`>> Value of world: ${JSON.stringify(world)}`);
-  // },
+  beforeScenario: function (world, context) {
+    let arr = world.pickle.name.split(/:/);
+    if (arr.length > 0) {
+      browser.options.testID = arr[0];
+    }
+    if (!browser.options.testID) {
+      throw Error(
+        `Error getting test ID for current case ${world.pickle.name}`
+      );
+    }
+    //return console.log(`>> Value of world: ${JSON.stringify(world)}`);
+    return console.log(`${GREEN}>> Starting test case: ${browser.options.testID} ${DEFAULT}`);
+  },
   /**
    *
    * Runs before a Cucumber Step.
@@ -291,6 +316,7 @@ export const config: Options.Testrunner = {
    * @param {Object}             context  Cucumber World object
    */
   // beforeStep: function (step, scenario, context) {
+    
   // },
   /**
    *

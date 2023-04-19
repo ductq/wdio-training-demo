@@ -1,6 +1,6 @@
 import { setWorldConstructor } from "@wdio/cucumber-framework";
 
-export class CustomVar{
+class CustomVar{
     testID: string
     urlE2E: string
     constructor(){

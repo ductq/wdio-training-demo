@@ -243,6 +243,17 @@ class CarRentalPageObject extends AbstractPage {
   async submit() {
     console.log("Submit");
     await this.submitBtn.click();
+    await browser.waitUntil(() => {
+      return browser.execute(() => {
+        return document.readyState === 'complete';
+      });
+    }, {
+      timeout: 10000, // maximum wait time in milliseconds
+      timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
+    });
+    //expect(await browser.getUrl()).toContain("search");
+    let curURL = await browser.getUrl();
+    chai.expect(curURL).contains("search");
   }
 }
 

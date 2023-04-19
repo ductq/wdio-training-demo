@@ -39,13 +39,4 @@ Then(
 
 Then(/^I search for the car$/, async () => {
   await HomePage.submit();
-  await browser.waitUntil(() => {
-    return browser.execute(() => {
-      return document.readyState === 'complete';
-    });
-  }, {
-    timeout: 10000, // maximum wait time in milliseconds
-    timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
-  });
-  expect(await browser.getUrl()).toContain("search");
 });

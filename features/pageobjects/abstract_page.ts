@@ -1,3 +1,5 @@
+import fs from "fs";
+import chai from "chai";
 /**
  * main page object containing all methods, selectors and functionality
  * that is shared across all page objects
@@ -31,4 +33,18 @@ export default class AbstractPage {
     await browser.pause(500);
   }
 
+  async writeToJsonFile(content: any, fileName: string) {
+    let path = `${process.cwd()}/${fileName}`;
+    fs.writeFile(path, JSON.stringify(JSON.stringify(content)), (err) => {
+      if (err) throw err;
+      console.log("Results saved to apiTest.json");
+    });
+  }
+
+  async responseCheck(res, exp) {
+    if (typeof(res) != typeof(exp)) {
+      exp = parseInt(exp);
+    }
+    chai.expect(res).to.equal(exp);
+  }
 }

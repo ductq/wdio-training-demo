@@ -3,15 +3,20 @@ import request from "supertest";
 import page from "../pageobjects/carrental_homepage.js";
 import chai from "chai";
 import fs from "fs";
+import demoPage from "../pageobjects/demoqa_page.js";
 
 Given(/^I am on the home page of demoqa$/, async () => {
-  //console.log(`Test ID: ${this.testID}`);
-  //console.log(`Test ID: ${this.urlE2E}`);
-  //await browser.url("https://demoqa.com/links");
-  //await browser.url("https://pokeapi.co/?");
-  // await browser.setupInterceptor();
+  // console.log(`Test ID: ${this.urlE2E}`);
+  await demoPage.navigateTo("https://demoqa.com/links");
+  //await browser.setupInterceptor();
 });
 
+/**
+ * Test demoqa with wdio-intercept-service
+ */
+Then(/^I check responses of the links$/, async () => {
+  await demoPage.checkAllLinks();
+});
 /**
  * Test demoqa with mock
  */
@@ -45,7 +50,9 @@ Given(/^I am on the home page of demoqa$/, async () => {
 //   await browser.pause(1000);
 //   await home.click();
 //   await browser.pause(3000);
-//   console.log(mockGet);
+//   //console.log(mockGet);
+//   console.log(JSON.stringify(mockGet.calls[0].headers));
+//   console.log(JSON.stringify(mockGet.calls[0].responseHeaders));
 //   //let request = await browser.getRequests();
 //   //let request2 = await browser.getRequests();
 //   //console.log(request)
@@ -58,7 +65,6 @@ Given(/^I am on the home page of demoqa$/, async () => {
 //     console.log("Results saved to apiTest.json");
 //   });
 // });
-
 
 /**
  * Test pokeapi with mock
@@ -79,48 +85,3 @@ Given(/^I am on the home page of demoqa$/, async () => {
 //   console.log(mockGet.calls[0].body);
 //   console.log(mockGet.calls[0].headers);
 // });
-
-/**
- * Test demoqa with wdio-intercept-service
- */
-Then(/^I check responses of the links$/, async () => {
-  await browser.url("https://demoqa.com/links");
-  await browser.setupInterceptor();
-  let request1 = await browser.getRequests();
-  let created = await $(`//*[@id="created"]`);
-  let nocontent = await $(`//*[@id="no-content"]`);
-  let moved = await $(`//*[@id="moved"]`);
-  let badrequest = await $(`//*[@id="bad-request"]`);
-  let unauthorized = await $(`//*[@id="unauthorized"]`);
-  let forbidden = await $(`//*[@id="forbidden"]`);
-  let notfound = await $(`//*[@id="invalid-url"]`);
-  let home = await $(`//*[@id="simpleLink"]`);
-  await created.click();
-  await browser.pause(1000);
-  await nocontent.click();
-  await browser.pause(1000);
-  await moved.click();
-  await browser.pause(1000);
-  await badrequest.click();
-  await browser.pause(1000);
-  await unauthorized.click();
-  await browser.pause(1000);
-  await forbidden.click();
-  await browser.pause(1000);
-  await notfound.click();
-  await browser.pause(1000);
-  await home.click();
-  await browser.pause(5000);
-  let request2 = await browser.getRequests();
-  let request3 = await browser.getRequest(0);
-  console.log(request1)
-  console.log(request2)
-  console.log(request3)
-  console.log("Status code: " + request2[1].response.statusCode)
-  console.log("Headers: " + JSON.stringify(request2[2].response.headers))
-  let path = `${process.cwd()}/apiTest.json`;
-  fs.writeFile(path, JSON.stringify(JSON.stringify(request3.response.headers)), (err) => {
-    if (err) throw err;
-    console.log("Results saved to apiTest.json");
-  });
-});
