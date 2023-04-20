@@ -11,13 +11,15 @@ Feature: Airport Car Rental
       | TestID        | Pickup  | Return    | Start date | Start time | End date   | End time | Country   | Age |
       | TC-E2E-001a   | AUS     | DAL       | 20-04-2023 | 7:00 am    | 07-07-2023 | 9:00 am  | Singapore | 70  |
       | TC-E2E-001b-N | LAX     | SEA       | 20-04-2023 | 10:00 pm   | 07-07-2023 | 13:00 am | Fin       | 25  |
-      | TC-E2E-001c-N | MIA     | JAX       | 01-04-2023 | 7:30 am    | 07-07-2023 | Noon     | land      | 20  |
-      | TC-E2E-001d-N | Vietnam | Singapore | 20-04-2023 | 7:30 am    | 32-07-2023 | Noon     | Vietnam   | 33  |
+      | TC-E2E-001c-N | MIA     | JAX       | 01-04-2023 | 0:30 am    | 07-07-2023 | 12:00 pm     | land      | 20  |
+      | TC-E2E-001d-N | Vietnam | Singapore | 20-04-2023 | 0:00 am    | 32-07-2023 | 12:00 pm     | Vietnam   | 33  |
       | TC-E2E-001e-N | AUS     | DAL       | 20-04-2023 | 7:30 am    | 07-07-2023 | 1:00 pm  | Singapore | 10  |
       | TC-E2E-001f-N | AUS     | DAL       | 20-04-2023 | 7:30 am    | 07-07-2023 | 5:00 pm  | Singapore | 75  |
+      | TC-E2E-001g   | TEX     | TEX       | 01-01-2024 | 7:00 am    | 01-01-2025 | 5:00 pm  | Vietnam   | 30  |
 
 
-  Scenario Outline: <TestID>: As a person from, I want to
+  Scenario Outline: <TestID>: I want to filter my result after searching
+
 # Select the desired price range
 # Select the other desired options
 # Verify that the search results include the correct car types and prices.

@@ -176,6 +176,16 @@ class CarRentalPageObject extends AbstractPage {
     }
   }
 
+  async timeConvert(time){
+    time = time.trim();
+    if(time == "0:00 am"){
+      time = "Midnight"
+    } else if (time == "12:00 pm" ){
+      time = "Noon"
+    }
+    return time
+  }
+
   async inputCarRentalInfo(
     pLocation: string,
     rLocation: string,
@@ -215,7 +225,8 @@ class CarRentalPageObject extends AbstractPage {
     console.log("Start time");
     await this.click(await this.startTime);
     //await this.clickOnFirstResult();
-    await this.dropDownListHandler(await this.startTime, "", sTime.trim());
+    let stTime = await this.timeConvert(sTime);
+    await this.dropDownListHandler(await this.startTime, "", stTime);
 
     console.log("End date");
     await this.click(await this.endDate);
@@ -224,7 +235,8 @@ class CarRentalPageObject extends AbstractPage {
     console.log("End time");
     await this.click(await this.endTime);
     //await this.clickOnFirstResult();
-    await this.dropDownListHandler(await this.endTime, "", eTime.trim());
+    let edTime = await this.timeConvert(eTime);
+    await this.dropDownListHandler(await this.endTime, "", edTime);
 
     chkBoxStatus = await (await this.country).isDisplayed();
     console.log("Same location checkbox status: " + chkBoxStatus);
