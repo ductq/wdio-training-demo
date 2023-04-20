@@ -1,4 +1,9 @@
-import { Given, When, Then, setWorldConstructor } from "@wdio/cucumber-framework";
+import {
+  Given,
+  When,
+  Then,
+  setWorldConstructor,
+} from "@wdio/cucumber-framework";
 // import {CustomVar} from "./global.js";
 import HomePage from "../pageobjects/carrental_homepage.js";
 import chai from "chai";
@@ -9,7 +14,9 @@ Given(/^I am on the home page of Airport Car Rental$/, async () => {
   //console.log(`Test ID: ${this.urlE2E}`);
   await HomePage.navigateTo("https://www.airportrentals.com/");
   await browser.refresh();
-  await browser.pause(2000);
+  if (TestID == "TC-E2E-001a") {
+    await browser.pause(7000);
+  }
 });
 
 Then(

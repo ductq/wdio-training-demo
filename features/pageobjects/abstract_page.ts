@@ -33,18 +33,37 @@ export default class AbstractPage {
     await browser.pause(500);
   }
 
-  async writeToJsonFile(content: any, fileName: string) {
-    let path = `${process.cwd()}/${fileName}`;
+  async writeToJsonFile(content: any, filePath: string) {
+    let path = `${process.cwd()}/${filePath}`;
     fs.writeFile(path, JSON.stringify(JSON.stringify(content)), (err) => {
       if (err) throw err;
-      console.log("Results saved to apiTest.json");
+      console.log(`Results saved to ${filePath}`);
     });
   }
 
   async responseCheck(res, exp) {
-    if (typeof(res) != typeof(exp)) {
+    if (typeof res != typeof exp) {
       exp = parseInt(exp);
     }
     chai.expect(res).to.equal(exp);
+  }
+
+  async dateConvert(date) {
+    let actualDate, day, month, year;
+
+    if (date.includes("ago")) {
+      date = date.split(" ")[0];
+      let curDate = new Date()
+      actualDate = new Date(curDate.getDate());
+      actualDate.setDate(curDate.getDate() - parseInt(date))
+    } else {
+      actualDate = new Date(date);
+    }
+
+    day = String(actualDate.getDate()).padStart(2, "0");
+    month = String(actualDate.getMonth() + 1).padStart(2, "0");
+    year = actualDate.getFullYear();
+    const dateString = `${day}-${month}-${year}`;
+    return dateString;
   }
 }

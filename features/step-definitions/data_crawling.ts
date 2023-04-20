@@ -9,7 +9,7 @@ Given(/^I am on the home page of ACR$/, async () => {
   //console.log(`Test ID: ${this.urlE2E}`);
   await page.navigateTo("https://www.airportrentals.com/");
   await browser.refresh();
-  await browser.pause(2000);
+  await browser.pause(7000);
 });
 
 Then(/^I get the branches data$/, async () => {
@@ -24,40 +24,48 @@ Then(/^I get the branches data$/, async () => {
       };
     })
   );
-  let path = `${process.cwd()}/results/branches.json`;
-  fs.writeFile(path, JSON.stringify(results), (err) => {
-    if (err) throw err;
-    console.log("Results saved to branches.json");
-  });
+  page.writeToJsonFile(results, "results/branches.json");
 });
 
 Then(/^I get the reviews data$/, async () => {
-  (await $(`.truspilot-desktop-widget-link`)).click()
-  await browser.pause(3000)
-  // Step 1: Locate the elements
+  (await $(`.truspilot-desktop-widget-link`)).click();
+  await browser.pause(5000);
+  
+  const frame = await $(`//iframe[1]`);
+  await browser.switchToFrame(frame);
   const reviews = await $$("div.tp-widget-review");
+  console.log(`Total number of reviews: ${reviews.length}`);
 
-  // Step 2: Extract the information
-  const data = await Promise.all(reviews.map(async (review) => {
-    const stars = await (
-      await review.$(".tp-stars").getAttribute("aria-label")
-    ).match(/\d+/)[0];
-    const source = await review.$(".tp-widget-review__source .label-text").getText();
-    const date = await review.$(".tp-widget-review__date").getText();
-    const text = await review.$(".text span").getText();
-    const reply = await review.$(".reply .reply__text")?.getText() || null;
-    const replyDate = await review.$(".reply .date")?.getText() || null;
+  const data = await Promise.all(
+    reviews.map(async (review) => {
+      const starText = await review.$("#starRating");
+      let star = await browser.execute((ele) => ele.textContent, starText);
+      star = star.toString().split(" ")[0];
+      const invited = (await review.$(".label-text").isExisting()) ? "Yes" : "No";
+      const title = await review.$(`div.header:nth-child(odd)`).getText();
+      let name = await review.$(".tp-widget-review__user-name").getText();
+      name = name.slice(0,-1);
+      const date = await review.$(".tp-widget-review__date").getText();
+      let actualDate = await page.dateConvert(date);
 
-    return { stars, source, date, text, reply, replyDate };
-  }));
+      const comment = await review.$(".text span").getText();
+      const replyText = await review.$(".reply .reply__text");
+      const reply = await browser.execute((ele) => ele.textContent, replyText);
+      const replyDate = await review.$(".reply .date").getText(); 
+      let actualReplyDate = await page.dateConvert(replyDate);
 
-  // Step 3: Store the extracted information
-  const jsonData = JSON.stringify(data);
-
-  // Step 4: Write to a JSON file
-  let path = `${process.cwd()}/results/reviews.json`;
-  fs.writeFile(path, jsonData, (err) => {
-    if (err) throw err;
-    console.log("Results saved to reviews.json");
-  });
+      return {
+        rating: star,
+        invited,
+        title,
+        name,
+        date: actualDate,
+        comment,
+        reply,
+        replyDate: actualReplyDate,
+      };
+    })
+  );
+  console.log(data);
+  page.writeToJsonFile(data, "results/reviews.json");
 });
