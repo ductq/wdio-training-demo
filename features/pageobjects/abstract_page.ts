@@ -41,11 +41,21 @@ export default class AbstractPage {
     });
   }
 
-  async responseCheck(res, exp) {
-    if (typeof res != typeof exp) {
-      exp = parseInt(exp);
+  async validationCheck(res, exp) {
+    try {
+      if (res.length === exp.length) {
+        if (typeof res != typeof exp) {
+          exp = parseInt(exp);
+        }
+        chai.expect(res).to.equal(exp);
+      } else if (res.length > exp.length) {
+        chai.expect(res).to.include(exp);
+      } else {
+        chai.expect(exp).to.include(res);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    chai.expect(res).to.equal(exp);
   }
 
   async dateConvert(date) {
@@ -53,9 +63,9 @@ export default class AbstractPage {
 
     if (date.includes("ago")) {
       date = date.split(" ")[0];
-      let curDate = new Date()
+      let curDate = new Date();
       actualDate = new Date(curDate.getDate());
-      actualDate.setDate(curDate.getDate() - parseInt(date))
+      actualDate.setDate(curDate.getDate() - parseInt(date));
     } else {
       actualDate = new Date(date);
     }

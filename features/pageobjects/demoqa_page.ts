@@ -34,8 +34,8 @@ class DemoQAPageObject extends AbstractPage {
     let responseText = getReasonPhrase(responseCode);
     console.log(`Status code: ${CYAN}${responseCode}${DEFAULT}`);
     console.log(`Status text: ${CYAN}${responseText}${DEFAULT}`);
-    this.responseCheck(responseCode,expectedCode);
-    this.responseCheck(responseText,expectedText);
+    this.validationCheck(responseCode,expectedCode);
+    this.validationCheck(responseText,expectedText);
     await browser.disableInterceptor();
   }
 

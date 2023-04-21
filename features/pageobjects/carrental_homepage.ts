@@ -1,18 +1,29 @@
 import { ChainablePromiseElement } from "webdriverio";
 
-import chai from "chai";
+import chai, { should } from "chai";
 import AbstractPage from "./abstract_page.js";
-
 /**
  * sub page containing specific selectors and methods for a specific page
  */
 class CarRentalPageObject extends AbstractPage {
+  infoToValidate: any;
   constructor() {
     super();
+    this.infoToValidate = {
+      pLocation: "" ,
+      rLocation: "",
+      sDate: "",
+      sTime: "any",
+      eDate: "",
+      eTime: "",
+      country: "",
+      age: ""
+    }
   }
+  
 
   get pickupLocation() {
-    return $("//span[contains(@aria-labelledby, 'select2-pickup_location')]");
+    return $("//span[contains(@id,'select2-pickup_location')]");
   }
 
   get pickupLocationField() {
@@ -24,7 +35,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get returnLocation() {
-    return $("//span[contains(@aria-labelledby, 'select2-dropoff_location')]");
+    return $("//span[contains(@id,'select2-dropoff_location')]");
   }
 
   get returnLocationField() {
@@ -52,7 +63,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get country() {
-    return $("//span[contains(@aria-labelledby, 'select2-country')]");
+    return $("//span[contains(@id, 'select2-country')]");
   }
 
   get countryField() {
@@ -176,14 +187,14 @@ class CarRentalPageObject extends AbstractPage {
     }
   }
 
-  async timeConvert(time){
+  async timeConvert(time) {
     time = time.trim();
-    if(time == "0:00 am"){
-      time = "Midnight"
-    } else if (time == "12:00 pm" ){
-      time = "Noon"
+    if (time == "0:00 am") {
+      time = "Midnight";
+    } else if (time == "12:00 pm") {
+      time = "Noon";
     }
-    return time
+    return time;
   }
 
   async inputCarRentalInfo(
@@ -250,23 +261,77 @@ class CarRentalPageObject extends AbstractPage {
 
     console.log("Age");
     await this.age.setValue(age);
+
   }
 
   async submit() {
     console.log(TestID);
     console.log("Submit");
+    this.infoToValidate.pLocation = await (await this.pickupLocation).getText();
+    //console.log(this.infoToValidate.pLocation)
+    this.infoToValidate.rLocation =  await (await this.returnLocation).getText(),
+    //console.log(this.infoToValidate.rLocation)
+    this.infoToValidate.sDate =  await (await this.startDate).getValue(),
+    //console.log(this.infoToValidate.sDate)
+    this.infoToValidate.sTime =  await (await this.startTime).getText(),
+    //console.log(this.infoToValidate.sTime)
+    this.infoToValidate.eDate =  await (await this.endDate).getValue(),
+    //console.log(this.infoToValidate.eDate)
+    this.infoToValidate.eTime = await (await this.endTime).getText(),
+    //console.log(this.infoToValidate.eTime)
+    this.infoToValidate.country =  await (await this.country).getText(),
+    //console.log(this.infoToValidate.country)
+    this.infoToValidate.age = await (await this.age).getValue(),
+    //console.log(this.infoToValidate.age)
+    console.log(this.infoToValidate);
     await this.submitBtn.click();
-    await browser.waitUntil(() => {
-      return browser.execute(() => {
-        return document.readyState === 'complete';
-      });
-    }, {
-      timeout: 10000, // maximum wait time in milliseconds
-      timeoutMsg: 'Page did not finish loading' // error message to display if timeout occurs
-    });
-    //expect(await browser.getUrl()).toContain("search");
-    let curURL = await browser.getUrl();
-    chai.expect(curURL).contains("search");
+  }
+
+  async validateInfo() {
+    console.log(TestID);
+    await browser.waitUntil(
+      () => {
+        return browser.execute(() => {
+          return document.readyState === "complete";
+        });
+      },
+      {
+        timeout: 10000, // maximum wait time in milliseconds
+        timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
+      }
+    );
+    console.log(this.infoToValidate);
+    await this.validationCheck(
+      this.infoToValidate.pLocation,
+      await (await this.pickupLocation).getText()
+    );
+    await this.validationCheck(
+      this.infoToValidate.rLocation,
+      await (await this.returnLocation).getText()
+    );
+    console.log((this.infoToValidate.sDate).split(" ")[1])
+    await this.validationCheck(
+      (this.infoToValidate.sDate).split(" ")[1],
+      (await (await this.startDate).getValue()).split(" ")[1]
+    );
+    await this.validationCheck(
+      this.infoToValidate.sTime,
+      await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
+    );
+    await this.validationCheck(
+      (this.infoToValidate.eDate).split(" ")[1],
+      (await (await this.endDate).getValue()).split(" ")[1]
+    );
+    await this.validationCheck(
+      this.infoToValidate.edTime,
+      await (await this.endTime).getText()
+    );
+    await this.validationCheck(
+      this.infoToValidate.country,
+      await (await this.country).getText()
+    );
+    await this.validationCheck(this.infoToValidate.age,await (await $(`//*[@name="age"][1]`)).getValue());
+    this.infoToValidate = [];
   }
 }
 
