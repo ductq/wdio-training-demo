@@ -1,10 +1,14 @@
-# WDIO specific
+# Misc
 data
 debug
 log
 results
 .DS_Store
 allure-results
+output.txt
+apiTest.json
+branches.json
+reviews.json
 # Logs
 logs
 *.log

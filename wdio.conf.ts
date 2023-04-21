@@ -1,5 +1,14 @@
+
 import type { Options } from "@wdio/types";
-import fs from "fs"
+import fs from "fs";
+let headless = process.env.HEADLESS;
+let debug = process.env.DEBUG;
+import dns from "node:dns";
+const RED = `\x1b[31m`;
+const GREEN = `\x1b[32m`;
+const CYAN = `\x1b[36m`;
+const DEFAULT = `\x1b[0m`;
+let TestID = ""
 
 export const config: Options.Testrunner = {
   //
@@ -32,7 +41,7 @@ export const config: Options.Testrunner = {
   // then the current working directory is where your `package.json` resides, so `wdio`
   // will be called from there.
   //
-  specs: ["./features/**/*.feature"],
+  specs: [`${process.cwd()}/features/**/*.feature`],
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -68,11 +77,36 @@ export const config: Options.Testrunner = {
       //
       browserName: "chrome",
       acceptInsecureCerts: true,
+      "goog:chromeOptions": {
+        args:
+          headless && headless.toUpperCase() === "Y"
+            ? [
+                "--disable-web-security",
+                "--headless",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+                "--window-size=1920,1080",
+              ]
+            : []
+      },
       // If outputDir is provided WebdriverIO can capture driver session logs
       // it is possible to configure which logTypes to include/exclude.
       // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
       // excludeDriverLogs: ['bugreport', 'server'],
     },
+    // {
+    //   // maxInstances can get overwritten per capability. So if you have an in-house Selenium
+    //   // grid with only 5 firefox instances available you can make sure that not more than
+    //   // 5 instances get started at a time.
+    //   maxInstances: 5,
+    //   //
+    //   browserName: "firefox",
+    //   acceptInsecureCerts: true,
+    //   // If outputDir is provided WebdriverIO can capture driver session logs
+    //   // it is possible to configure which logTypes to include/exclude.
+    //   // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
+    //   // excludeDriverLogs: ['bugreport', 'server'],
+    // }
   ],
   //
   // ===================
@@ -81,7 +115,7 @@ export const config: Options.Testrunner = {
   // Define all options that are relevant for the WebdriverIO instance here
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: "info",
+  logLevel: debug && debug.toUpperCase() === "Y" ? "info" : "error",
   //
   // Set specific log levels per logger
   // loggers:
@@ -121,7 +155,7 @@ export const config: Options.Testrunner = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ["chromedriver", "geckodriver"],
+  services: ["chromedriver","intercept"],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
@@ -143,7 +177,17 @@ export const config: Options.Testrunner = {
   // Test reporter for stdout.
   // The only one supported by default is 'dot'
   // see also: https://webdriver.io/docs/dot-reporter
-  reporters: ["spec", ["allure", { outputDir: "allure-results" }]],
+  reporters: [
+    "spec",
+    [
+      "allure",
+      {
+        outputDir: "allure-results",
+        disableWebdriverStepsReporting: true,
+        useCucumberStepReporter: true,
+      },
+    ],
+  ],
 
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
@@ -186,8 +230,8 @@ export const config: Options.Testrunner = {
    * @param {Array.<Object>} capabilities list of capabilities details
    */
   onPrepare: function (config, capabilities) {
-    if(fs.existsSync("./allure-results")){
-        fs.rmdirSync("./allure-results", {recursive: true}) 
+    if (fs.existsSync("./allure-results")) {
+      fs.rmdirSync("./allure-results", { recursive: true });
     }
   },
   /**
@@ -218,8 +262,13 @@ export const config: Options.Testrunner = {
    * @param {Array.<String>} specs List of spec file paths that are to be run
    * @param {String} cid worker id (e.g. 0-0)
    */
-  // beforeSession: function (config, capabilities, specs, cid) {
-  // },
+  beforeSession: function (config, capabilities, specs, cid) {
+    dns.setDefaultResultOrder("ipv4first");
+    global.RED = RED;
+    global.GREEN = GREEN;
+    global.CYAN = CYAN;
+    global.DEFAULT = DEFAULT;
+  },
   /**
    * Gets executed before test execution begins. At this point you can access to all global
    * variables like `browser`. It is the perfect place to define custom commands.
@@ -252,7 +301,19 @@ export const config: Options.Testrunner = {
    * @param {Object}                 context  Cucumber World object
    */
   beforeScenario: function (world, context) {
-    return console.log(`>> Value of world: ${JSON.stringify(world)}`);
+    let arr = world.pickle.name.split(/:/);
+    if (arr.length > 0) {
+      browser.options.testID = arr[0];
+    }
+    if (!browser.options.testID) {
+      throw Error(
+        `Error getting test ID for current case ${world.pickle.name}`
+      );
+    }
+    TestID = browser.options.testID;
+    global.TestID = TestID;
+    //return console.log(`>> Value of world: ${JSON.stringify(world)}`);
+    return console.log(`${GREEN}>> Starting test case: ${browser.options.testID} ${DEFAULT}`);
   },
   /**
    *
@@ -262,6 +323,7 @@ export const config: Options.Testrunner = {
    * @param {Object}             context  Cucumber World object
    */
   // beforeStep: function (step, scenario, context) {
+    
   // },
   /**
    *
