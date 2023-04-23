@@ -13,7 +13,7 @@ Given(/^User at the home page of Airport Car Rental$/, async () => {
   // if (TestID == "TC-E2E-001a") {
   //   await browser.pause(10000);
   // }
-  await browser.pause(7000)
+  await browser.pause(8000)
 });
 
 When(
@@ -47,4 +47,8 @@ When(/^User submit the form$/, async () => {
 
 Then(/^Validate the information after search$/, async() =>{
   await HomePage.validateInfo();
+})
+
+Then(/^Validate the message$/, async() =>{
+  await HomePage.validateInfoNegative();
 })

@@ -54,7 +54,7 @@ export default class AbstractPage {
         chai.expect(exp).to.include(res);
       }
     } catch (err) {
-      console.log(err);
+      console.log(`${RED} ERROR AT VALUE: ${DEFAULT} ${res} and ${exp}, Error: ${err}`);
     }
   }
 

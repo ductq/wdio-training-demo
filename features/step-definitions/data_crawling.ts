@@ -69,3 +69,5 @@ Then(/^I get the reviews data$/, async () => {
   console.log(data);
   page.writeToJsonFile(data, "results/reviews.json");
 });
+
+

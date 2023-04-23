@@ -17,6 +17,11 @@ Given(/^I am on the home page of demoqa$/, async () => {
 Then(/^I check responses of the links$/, async () => {
   await demoPage.checkAllLinks();
 });
+
+Then(/^I check login feature$/, async () => {
+  await demoPage.navigateTo("https://demoqa.com/");
+  await demoPage.loginRequest();
+});
 /**
  * Test demoqa with mock
  */

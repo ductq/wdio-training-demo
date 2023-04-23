@@ -44,6 +44,32 @@ class DemoQAPageObject extends AbstractPage {
       await this.assertLink(await $(`//p[${i}]/a`));
     }
   }
+
+  async loginRequest() {
+    const loginData = {
+      "userName": "test_user001",
+      "password": "P@ssword1234!"
+    };
+    
+    await fetch('https://demoqa.com/Account/v1/GenerateToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(loginData)
+    })
+    .then(async response => {
+      if (await response.ok) {
+        // Login successful
+        console.log(JSON.stringify(await response))
+      } else {
+        // Login failed
+        console.log("Login failed!")
+      }
+    })
+    .catch(error => console.error(error));
+    console.log(await browser.getUrl());
+  }
 }
 
 export default new DemoQAPageObject();

@@ -169,7 +169,7 @@ class CarRentalPageObject extends AbstractPage {
             async (tdElement) =>
               (await tdElement.getAttribute("class")) === "day"
           );
-          console.log(parseInt(day));
+          //console.log(parseInt(day));
           for (let d of days) {
             if (parseInt(await d.getText()) === parseInt(day)) {
               await this.click(d);
@@ -181,7 +181,7 @@ class CarRentalPageObject extends AbstractPage {
         console.log("Date is before today!!!");
       }
     } else if (dateInputTimestamp < curDateTimestamp) {
-      console.log("The date has already passed.");
+      console.log("The input date has already passed. Today will be chosen as start date.");
     } else {
       console.log("The date is today.");
     }
@@ -207,7 +207,7 @@ class CarRentalPageObject extends AbstractPage {
     country: string,
     age: string | number
   ) {
-    console.log("Pick up Location");
+    //console.log("Pick up Location");
     await this.click(await this.pickupLocation);
     await this.dropDownListHandler(
       await this.pickupLocationField,
@@ -216,12 +216,12 @@ class CarRentalPageObject extends AbstractPage {
     );
 
     let chkBoxStatus = await (await this.returnLocation).isDisplayed();
-    console.log("Same location checkbox status: " + chkBoxStatus);
+    //console.log("Same location checkbox status: " + chkBoxStatus);
     if (!chkBoxStatus) {
       await (await this.sameLocationCheckBox).click();
     }
 
-    console.log("Return Location");
+    //console.log("Return Location");
     await this.click(await this.returnLocation);
     await this.dropDownListHandler(
       await this.returnLocationField,
@@ -229,44 +229,43 @@ class CarRentalPageObject extends AbstractPage {
       ""
     );
 
-    console.log("Start date");
+    //console.log("Start date");
     await this.click(await this.startDate);
     await this.dateTimePickerHandler(sDate);
 
-    console.log("Start time");
+    //console.log("Start time");
     await this.click(await this.startTime);
     //await this.clickOnFirstResult();
     let stTime = await this.timeConvert(sTime);
     await this.dropDownListHandler(await this.startTime, "", stTime);
 
-    console.log("End date");
+    //console.log("End date");
     await this.click(await this.endDate);
     await this.dateTimePickerHandler(eDate);
 
-    console.log("End time");
+    //console.log("End time");
     await this.click(await this.endTime);
     //await this.clickOnFirstResult();
     let edTime = await this.timeConvert(eTime);
     await this.dropDownListHandler(await this.endTime, "", edTime);
 
     chkBoxStatus = await (await this.country).isDisplayed();
-    console.log("Same location checkbox status: " + chkBoxStatus);
+    //console.log("Same location checkbox status: " + chkBoxStatus);
     if (!chkBoxStatus) {
       await this.click(await this.countryAndAge);
     }
 
-    console.log("Country");
+    //console.log("Country");
     await this.click(await this.country);
     await this.dropDownListHandler(await this.countryField, country, "");
 
-    console.log("Age");
+    //console.log("Age");
     await this.age.setValue(age);
 
   }
 
   async submit() {
-    console.log(TestID);
-    console.log("Submit");
+    // console.log(`${CYAN} Submit! ${DEFAULT}`);
     this.infoToValidate.pLocation = await (await this.pickupLocation).getText();
     //console.log(this.infoToValidate.pLocation)
     this.infoToValidate.rLocation =  await (await this.returnLocation).getText(),
@@ -283,12 +282,12 @@ class CarRentalPageObject extends AbstractPage {
     //console.log(this.infoToValidate.country)
     this.infoToValidate.age = await (await this.age).getValue(),
     //console.log(this.infoToValidate.age)
-    console.log(this.infoToValidate);
+    //console.log(this.infoToValidate);
     await this.submitBtn.click();
   }
 
   async validateInfo() {
-    console.log(TestID);
+    //console.log(TestID);
     await browser.waitUntil(
       () => {
         return browser.execute(() => {
@@ -300,38 +299,103 @@ class CarRentalPageObject extends AbstractPage {
         timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
       }
     );
-    console.log(this.infoToValidate);
+    await expect(await browser.getUrl()).toContain("search");
+    //console.log(this.infoToValidate);
     await this.validationCheck(
       this.infoToValidate.pLocation,
       await (await this.pickupLocation).getText()
     );
+  
     await this.validationCheck(
       this.infoToValidate.rLocation,
       await (await this.returnLocation).getText()
     );
-    console.log((this.infoToValidate.sDate).split(" ")[1])
+
     await this.validationCheck(
       (this.infoToValidate.sDate).split(" ")[1],
       (await (await this.startDate).getValue()).split(" ")[1]
     );
+
     await this.validationCheck(
       this.infoToValidate.sTime,
       await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
     );
+
     await this.validationCheck(
       (this.infoToValidate.eDate).split(" ")[1],
       (await (await this.endDate).getValue()).split(" ")[1]
     );
+
     await this.validationCheck(
-      this.infoToValidate.edTime,
+      this.infoToValidate.eTime,
       await (await this.endTime).getText()
     );
+
     await this.validationCheck(
       this.infoToValidate.country,
       await (await this.country).getText()
     );
+
     await this.validationCheck(this.infoToValidate.age,await (await $(`//*[@name="age"][1]`)).getValue());
+    
     this.infoToValidate = [];
+    console.log(`${CYAN} Validation Finish! ${DEFAULT}`);
+  }
+
+  async validateInfoNegative() {
+    //console.log(TestID);
+    await browser.waitUntil(
+      () => {
+        return browser.execute(() => {
+          return document.readyState === "complete";
+        });
+      },
+      {
+        timeout: 10000, // maximum wait time in milliseconds
+        timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
+      }
+    );
+    await expect(await browser.getUrl()).toContain("search");
+    
+    await this.validationCheck(
+      this.infoToValidate.pLocation,
+      await (await this.pickupLocation).getText()
+    );
+  
+    await this.validationCheck(
+      this.infoToValidate.rLocation,
+      await (await this.returnLocation).getText()
+    );
+
+    await this.validationCheck(
+      (this.infoToValidate.sDate).split(" ")[1],
+      (await (await this.startDate).getValue()).split(" ")[1]
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.sTime,
+      await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
+    );
+
+    await this.validationCheck(
+      (this.infoToValidate.eDate).split(" ")[1],
+      (await (await this.endDate).getValue()).split(" ")[1]
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.eTime,
+      await (await this.endTime).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.country,
+      await (await this.country).getText()
+    );
+
+    await this.validationCheck(this.infoToValidate.age,await (await $(`//*[@name="age"][1]`)).getValue());
+    
+    this.infoToValidate = [];
+    console.log(`${CYAN} Validation Finish! ${DEFAULT}`);
   }
 }
 
