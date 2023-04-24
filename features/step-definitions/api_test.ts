@@ -19,8 +19,17 @@ Then(/^I check responses of the links$/, async () => {
 });
 
 Then(/^I check login feature$/, async () => {
-  await demoPage.navigateTo("https://demoqa.com/");
+  //await demoPage.navigateTo("https://demoqa.com/");
   await demoPage.loginRequest();
+});
+
+Then(/^I check signup feature$/, async () => {
+  //await demoPage.navigateTo("https://demoqa.com/");
+  await demoPage.signupRequest();
+  await demoPage.navigateTo("https://demoqa.com/login");
+  await demoPage.login();
+  await browser.pause(5000);
+  chai.expect(await (await $(`.ReactTable`)).isExisting()).true;
 });
 /**
  * Test demoqa with mock

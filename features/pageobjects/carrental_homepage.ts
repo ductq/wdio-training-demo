@@ -288,17 +288,7 @@ class CarRentalPageObject extends AbstractPage {
 
   async validateInfo() {
     //console.log(TestID);
-    await browser.waitUntil(
-      () => {
-        return browser.execute(() => {
-          return document.readyState === "complete";
-        });
-      },
-      {
-        timeout: 10000, // maximum wait time in milliseconds
-        timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
-      }
-    );
+    await this.waitForBrowserLoading();
     await expect(await browser.getUrl()).toContain("search");
     //console.log(this.infoToValidate);
     await this.validationCheck(
@@ -344,17 +334,7 @@ class CarRentalPageObject extends AbstractPage {
 
   async validateInfoNegative() {
     //console.log(TestID);
-    await browser.waitUntil(
-      () => {
-        return browser.execute(() => {
-          return document.readyState === "complete";
-        });
-      },
-      {
-        timeout: 10000, // maximum wait time in milliseconds
-        timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
-      }
-    );
+    await this.waitForBrowserLoading();
     await expect(await browser.getUrl()).toContain("search");
     
     await this.validationCheck(

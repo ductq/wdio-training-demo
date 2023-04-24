@@ -54,7 +54,9 @@ export default class AbstractPage {
         chai.expect(exp).to.include(res);
       }
     } catch (err) {
-      console.log(`${RED} ERROR AT VALUE: ${DEFAULT} ${res} and ${exp}, Error: ${err}`);
+      console.log(
+        `${RED} ERROR AT VALUE: ${DEFAULT} ${res} and ${exp}, Error: ${err}`
+      );
     }
   }
 
@@ -75,5 +77,29 @@ export default class AbstractPage {
     year = actualDate.getFullYear();
     const dateString = `${day}-${month}-${year}`;
     return dateString;
+  }
+
+  async waitForBrowserLoading() {
+    await browser.waitUntil(
+      () => {
+        return browser.execute(() => {
+          return document.readyState === "complete";
+        });
+      },
+      {
+        timeout: 10000, // maximum wait time in milliseconds
+        timeoutMsg: "Page did not finish loading", // error message to display if timeout occurs
+      }
+    );
+  }
+
+  generateRandomString() {
+    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      result += chars[randomIndex];
+    }
+    return result;
   }
 }

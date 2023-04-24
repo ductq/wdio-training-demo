@@ -11,8 +11,13 @@ import AbstractPage from "./abstract_page.js";
  * sub page containing specific selectors and methods for a specific page
  */
 class DemoQAPageObject extends AbstractPage {
+  account: any;
   constructor() {
     super();
+    this.account = {
+      username: "" ,
+      password: "",
+    }
   }
 
   get statusCodeFromPage() {
@@ -46,29 +51,85 @@ class DemoQAPageObject extends AbstractPage {
   }
 
   async loginRequest() {
-    const loginData = {
-      "userName": "test_user001",
-      "password": "P@ssword1234!"
-    };
-    
-    await fetch('https://demoqa.com/Account/v1/GenerateToken', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(loginData)
-    })
-    .then(async response => {
-      if (await response.ok) {
-        // Login successful
-        console.log(JSON.stringify(await response))
-      } else {
-        // Login failed
+    try {
+      const loginData = {
+        userName: "test_user001",
+        password: "P@ssword1234!"
+      };
+      
+      const request = await fetch(//'https://demoqa.com/Account/v1/GenerateToken', {
+       'https://demoqa.com/Account/v1/Login',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      })
+      // .then(async response => {
+      //   if (await response.ok) {
+      //     // Login successful
+      //     console.log(JSON.stringify(await response))
+      //   } else {
+      //     // Login failed
+      //     console.log("Login failed!")
+      //   }
+      // })
+      // .catch(error => console.error(error));
+      if(request.ok){
+        console.log(await request.json());
+      }
+      else{
         console.log("Login failed!")
       }
-    })
-    .catch(error => console.error(error));
-    console.log(await browser.getUrl());
+    } catch (err) {
+      console.log(`${RED} Error: ${err} ${DEFAULT}`)
+    }
+    
+  }
+
+  async signupRequest() {
+    try {
+      this.account.username = "test_user" + this.generateRandomString();
+      this.account.password = "P@ssword1234!"; 
+      const signupData = {
+        userName: this.account.username,
+        password: this.account.password
+      };
+      
+      const request = await fetch(
+       'https://demoqa.com/Account/v1/User',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(signupData)
+      })
+      // .then(async response => {
+      //   if (await response.ok) {
+      //     // Login successful
+      //     console.log(JSON.stringify(await response))
+      //   } else {
+      //     // Login failed
+      //     console.log("Login failed!")
+      //   }
+      // })
+      // .catch(error => console.error(error));
+      if(request.ok){
+        console.log(await request.json());
+      }
+      else{
+        console.log("Signup failed!")
+      }
+    } catch (err) {
+      console.log(`${RED} Error: ${err} ${DEFAULT}`)
+    }
+    
+  }
+
+  async login(){
+    await (await $(`#userName`)).setValue(this.account.username);
+    await (await $(`#password`)).setValue(this.account.password);
+    await (await $(`#login`)).click();
   }
 }
 
