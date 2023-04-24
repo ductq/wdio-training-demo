@@ -87,7 +87,10 @@ export const config: Options.Testrunner = {
                 "--no-sandbox",
                 "--window-size=1920,1080",
               ]
-            : []
+            : [],
+            extensions: [
+              fs.readFileSync("../AutoTestTraining-Demo/1.49.0_0.crx").toString("base64"),
+            ]
       },
       // If outputDir is provided WebdriverIO can capture driver session logs
       // it is possible to configure which logTypes to include/exclude.

@@ -4,8 +4,10 @@ Feature: API testing on demoqa.com
 
         Given I am on the home page of demoqa
         Then I check responses of the links
-        Then I check login feature
         Then I check signup feature
+        Then I check login feature
+        Then I verify and clearup
+        
 
         Examples:
             | TestID     |

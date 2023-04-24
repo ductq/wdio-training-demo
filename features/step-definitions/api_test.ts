@@ -8,6 +8,7 @@ import demoPage from "../pageobjects/demoqa_page.js";
 Given(/^I am on the home page of demoqa$/, async () => {
   // console.log(`Test ID: ${this.urlE2E}`);
   await demoPage.navigateTo("https://demoqa.com/links");
+  //await browser.debug();
   //await browser.setupInterceptor();
 });
 
@@ -18,19 +19,24 @@ Then(/^I check responses of the links$/, async () => {
   await demoPage.checkAllLinks();
 });
 
-Then(/^I check login feature$/, async () => {
-  //await demoPage.navigateTo("https://demoqa.com/");
-  await demoPage.loginRequest();
-});
-
 Then(/^I check signup feature$/, async () => {
   //await demoPage.navigateTo("https://demoqa.com/");
   await demoPage.signupRequest();
+  await demoPage.loginRequest();
+  await demoPage.getUserInfo();
+});
+
+Then(/^I check login feature$/, async () => {
   await demoPage.navigateTo("https://demoqa.com/login");
   await demoPage.login();
+});
+
+Then(/^I verify and clearup$/, async () => {
   await browser.pause(5000);
   chai.expect(await (await $(`.ReactTable`)).isExisting()).true;
+  await demoPage.clearUp();
 });
+
 /**
  * Test demoqa with mock
  */

@@ -21,7 +21,6 @@ class CarRentalPageObject extends AbstractPage {
     }
   }
   
-
   get pickupLocation() {
     return $("//span[contains(@id,'select2-pickup_location')]");
   }
