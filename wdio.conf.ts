@@ -4,6 +4,7 @@ import fs from "fs";
 let headless = process.env.HEADLESS;
 let debug = process.env.DEBUG;
 import dns from "node:dns";
+import allure from "allure-commandline";
 const RED = `\x1b[31m`;
 const GREEN = `\x1b[32m`;
 const CYAN = `\x1b[36m`;
@@ -69,47 +70,47 @@ export const config: Options.Testrunner = {
   // https://saucelabs.com/platform/platform-configurator
   //
   capabilities: [
-    {
-      // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-      // grid with only 5 firefox instances available you can make sure that not more than
-      // 5 instances get started at a time.
-      maxInstances: 5,
-      //
-      browserName: "chrome",
-      acceptInsecureCerts: true,
-      "goog:chromeOptions": {
-        args:
-          headless && headless.toUpperCase() === "Y"
-            ? [
-                "--disable-web-security",
-                "--headless",
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-                "--window-size=1920,1080",
-              ]
-            : [],
-            extensions: [
-              fs.readFileSync("../AutoTestTraining-Demo/1.49.0_0.crx").toString("base64"),
-            ]
-      },
-      // If outputDir is provided WebdriverIO can capture driver session logs
-      // it is possible to configure which logTypes to include/exclude.
-      // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
-      // excludeDriverLogs: ['bugreport', 'server'],
-    },
     // {
     //   // maxInstances can get overwritten per capability. So if you have an in-house Selenium
     //   // grid with only 5 firefox instances available you can make sure that not more than
     //   // 5 instances get started at a time.
     //   maxInstances: 5,
     //   //
-    //   browserName: "firefox",
+    //   browserName: "chrome",
     //   acceptInsecureCerts: true,
+    //   "goog:chromeOptions": {
+    //     args:
+    //       headless && headless.toUpperCase() === "Y"
+    //         ? [
+    //             "--disable-web-security",
+    //             "--headless",
+    //             "--disable-dev-shm-usage",
+    //             "--no-sandbox",
+    //             "--window-size=1920,1080",
+    //           ]
+    //         : [],
+    //         extensions: [
+    //           fs.readFileSync("../AutoTestTraining-Demo/1.49.0_0.crx").toString("base64"),
+    //         ]
+    //   },
     //   // If outputDir is provided WebdriverIO can capture driver session logs
     //   // it is possible to configure which logTypes to include/exclude.
     //   // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
     //   // excludeDriverLogs: ['bugreport', 'server'],
-    // }
+    // },
+    {
+      // maxInstances can get overwritten per capability. So if you have an in-house Selenium
+      // grid with only 5 firefox instances available you can make sure that not more than
+      // 5 instances get started at a time.
+      maxInstances: 5,
+      //
+      browserName: "firefox",
+      acceptInsecureCerts: true,
+      // If outputDir is provided WebdriverIO can capture driver session logs
+      // it is possible to configure which logTypes to include/exclude.
+      // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
+      // excludeDriverLogs: ['bugreport', 'server'],
+    }
   ],
   //
   // ===================
@@ -158,7 +159,10 @@ export const config: Options.Testrunner = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ["chromedriver","intercept"],
+  services: [
+    //"chromedriver",
+    "geckodriver",
+    "intercept"],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
@@ -396,8 +400,26 @@ export const config: Options.Testrunner = {
    * @param {Array.<Object>} capabilities list of capabilities details
    * @param {<Object>} results object containing test results
    */
-  // onComplete: function(exitCode, config, capabilities, results) {
-  // },
+  onComplete: function(exitCode, config, capabilities, results) {
+    const reportError = new Error('Could not generate Allure report')
+        const generation = allure(['generate', 'allure-results', '--clean'])
+        return new Promise((resolve, reject) => {
+            const generationTimeout = setTimeout(
+                () => reject(reportError),
+                5000)
+
+            generation.on('exit', function(exitCode) {
+                clearTimeout(generationTimeout)
+
+                if (exitCode !== 0) {
+                    return reject(reportError)
+                }
+
+                console.log('Allure report successfully generated')
+                resolve()
+            })
+        })
+  },
   /**
    * Gets executed when a refresh happens.
    * @param {String} oldSessionId session ID of the old session

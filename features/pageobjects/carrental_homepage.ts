@@ -10,17 +10,17 @@ class CarRentalPageObject extends AbstractPage {
   constructor() {
     super();
     this.infoToValidate = {
-      pLocation: "" ,
+      pLocation: "",
       rLocation: "",
       sDate: "",
       sTime: "any",
       eDate: "",
       eTime: "",
       country: "",
-      age: ""
-    }
+      age: "",
+    };
   }
-  
+
   get pickupLocation() {
     return $("//span[contains(@id,'select2-pickup_location')]");
   }
@@ -117,70 +117,106 @@ class CarRentalPageObject extends AbstractPage {
     }
     await this.processResultDDL(key);
   }
-
+  //Handle datetime picker for start date and end date
   async dateTimePickerHandler(dateInput: string) {
+    //Split the input date into year, month and day
     let dateSplit = dateInput.split("-");
     let year = dateSplit[2].trim();
     let month = dateSplit[1].trim();
     let day = dateSplit[0].trim();
 
+    //Format the input date using Date()
     const dateObj = new Date(`${year}-${month}-${day}`);
     const curDate = new Date();
     const dateInputTimestamp = dateObj.getTime();
     const curDateTimestamp = curDate.getTime();
 
+    //Compare input date with current date
     if (dateInputTimestamp > curDateTimestamp) {
+      //Convert month of the input date to String, eg: 4 -> April
       const monthName = dateObj.toLocaleString("default", { month: "long" });
+
+      //Selector for the date that appears in the date time picker
       let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
+
+      //Get the DATE (Month Year) appears in the date time picker
       let monthYear = await dateOnCalendar.getText();
+
+      //Get the display year by spliting the date from the date time picker
       let yearOnCalendar = monthYear.split(" ")[1].trim();
 
-      if (parseInt(year) >= parseInt(yearOnCalendar)) {
-        await this.click(await dateOnCalendar);
-        if (
-          parseInt(year.substring(0, 3)) >=
-          parseInt(yearOnCalendar.substring(0, 3))
-        ) {
-          dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
-          //Click on the year to change to decade form: 12 years selection
-          await this.click(await dateOnCalendar);
-          dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
-          let decade = (await dateOnCalendar.getText()).substring(0, 3);
-          let next = await $("(//th[@class='next'])[3]");
-          while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
-            await this.click(next);
-          }
-          let years = await $$(".year");
-          for (let y of years) {
-            if ((await y.getText()) === year) {
-              await this.click(y);
-              break;
-            }
-          }
-          let months = await $$(".month");
-          for (let m of months) {
-            if ((await m.getText()) === monthName.substring(0, 3)) {
-              await this.click(m);
-              break;
-            }
-          }
-          let days = (await $$("tbody td")).filter(
-            async (tdElement) =>
-              (await tdElement.getAttribute("class")) === "day"
-          );
-          //console.log(parseInt(day));
-          for (let d of days) {
-            if (parseInt(await d.getText()) === parseInt(day)) {
-              await this.click(d);
-              break;
-            }
-          }
+      //Click on the DATE to change to month selection view
+      await this.click(await dateOnCalendar);
+
+      //Selector for the DATE after view change from the click action of the above line of code
+      dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
+
+      //Click on the DATE to change to year selection view
+      await this.click(await dateOnCalendar);
+
+      //Selector for the DATE after view change from the click action of the above line of code
+      dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
+
+      //Get the decade - first 3 character that appears in the date time picker, e.g: 2020-2029 -> decade: 202
+      let decade = (await dateOnCalendar.getText()).substring(0, 3);
+
+      if (
+        parseInt(year.substring(0, 3)) >
+        parseInt(yearOnCalendar.substring(0, 3))
+      ) {
+        //Case that the input date's decade is bigger than the current decade
+
+        //Next button for decade
+        let next = await $("(//th[@class='next'])[3]");
+        //Loop until decade is no longer bigger
+        while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
+          await this.click(next);
+          decade = (await dateOnCalendar.getText()).substring(0, 3);
         }
-      } else {
-        console.log("Date is before today!!!");
+      } else if (
+        parseInt(year.substring(0, 3)) <
+        parseInt(yearOnCalendar.substring(0, 3))
+      ) {
+        //Case that the input date's decade is smaller than the current decade
+
+        //Previous button for decade
+        let prev = await $("(//th[@class='prev'])[3]");
+        //Loop until decade is no longer smaller
+        while (parseInt(year.substring(0, 3)) < parseInt(decade)) {
+          await this.click(prev);
+          decade = (await dateOnCalendar.getText()).substring(0, 3);
+        }
+      }
+      //Get all the years on the picker then click on the year that match the input
+      let years = await $$(".year");
+      for (let y of years) {
+        if ((await y.getText()) === year) {
+          await this.click(y);
+          break;
+        }
+      }
+      //Get all the months on the picker then click on the month that match the input
+      let months = await $$(".month");
+      for (let m of months) {
+        if ((await m.getText()) === monthName.substring(0, 3)) {
+          await this.click(m);
+          break;
+        }
+      }
+      //Get all the days (filter the ones that does not belong to the selected month) on the picker then click on the day that match the input
+      let days = (await $$("tbody td")).filter(
+        async (tdElement) => (await tdElement.getAttribute("class")) === "day"
+      );
+      for (let d of days) {
+        if (parseInt(await d.getText()) === parseInt(day)) {
+          await this.click(d);
+          break;
+        }
       }
     } else if (dateInputTimestamp < curDateTimestamp) {
-      console.log("The input date has already passed. Today will be chosen as start date.");
+      console.log(
+        "The input date has already passed. Today will be automatically chosen."
+      );
     } else {
       console.log("The date is today.");
     }
@@ -260,121 +296,103 @@ class CarRentalPageObject extends AbstractPage {
 
     //console.log("Age");
     await this.age.setValue(age);
-
   }
 
   async submit() {
     // console.log(`${CYAN} Submit! ${DEFAULT}`);
     this.infoToValidate.pLocation = await (await this.pickupLocation).getText();
     //console.log(this.infoToValidate.pLocation)
-    this.infoToValidate.rLocation =  await (await this.returnLocation).getText(),
-    //console.log(this.infoToValidate.rLocation)
-    this.infoToValidate.sDate =  await (await this.startDate).getValue(),
-    //console.log(this.infoToValidate.sDate)
-    this.infoToValidate.sTime =  await (await this.startTime).getText(),
-    //console.log(this.infoToValidate.sTime)
-    this.infoToValidate.eDate =  await (await this.endDate).getValue(),
-    //console.log(this.infoToValidate.eDate)
-    this.infoToValidate.eTime = await (await this.endTime).getText(),
-    //console.log(this.infoToValidate.eTime)
-    this.infoToValidate.country =  await (await this.country).getText(),
-    //console.log(this.infoToValidate.country)
-    this.infoToValidate.age = await (await this.age).getValue(),
-    //console.log(this.infoToValidate.age)
+    (this.infoToValidate.rLocation = await (
+      await this.returnLocation
+    ).getText()),
+      //console.log(this.infoToValidate.rLocation)
+      (this.infoToValidate.sDate = await (await this.startDate).getValue()),
+      //console.log(this.infoToValidate.sDate)
+      (this.infoToValidate.sTime = await (await this.startTime).getText()),
+      //console.log(this.infoToValidate.sTime)
+      (this.infoToValidate.eDate = await (await this.endDate).getValue()),
+      //console.log(this.infoToValidate.eDate)
+      (this.infoToValidate.eTime = await (await this.endTime).getText()),
+      //console.log(this.infoToValidate.eTime)
+      (this.infoToValidate.country = await (await this.country).getText()),
+      //console.log(this.infoToValidate.country)
+      (this.infoToValidate.age = await (await this.age).getValue()),
+      //console.log(this.infoToValidate.age)
+      //console.log(this.infoToValidate);
+      await this.submitBtn.click();
+  }
+
+  async infoCorrectionCheck() {
+    //console.log(TestID);
+    await this.waitForBrowserLoading();
+    await expect(await browser.getUrl()).toContain("search");
     //console.log(this.infoToValidate);
-    await this.submitBtn.click();
+    await this.validationCheck(
+      this.infoToValidate.pLocation,
+      await (await this.pickupLocation).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.rLocation,
+      await (await this.returnLocation).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.sDate.split(" ")[1],
+      (await (await this.startDate).getValue()).split(" ")[1]
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.sTime,
+      await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.eDate.split(" ")[1],
+      (await (await this.endDate).getValue()).split(" ")[1]
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.eTime,
+      await (await this.endTime).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.country,
+      await (await this.country).getText()
+    );
+
+    await this.validationCheck(
+      this.infoToValidate.age,
+      await (await $(`//*[@name="age"][1]`)).getValue()
+    );
+
+    this.infoToValidate = [];
+    console.log(`${CYAN} Validation Finish! ${DEFAULT}`);
   }
 
   async validateInfo() {
-    //console.log(TestID);
-    await this.waitForBrowserLoading();
-    await expect(await browser.getUrl()).toContain("search");
-    //console.log(this.infoToValidate);
-    await this.validationCheck(
-      this.infoToValidate.pLocation,
-      await (await this.pickupLocation).getText()
-    );
-  
-    await this.validationCheck(
-      this.infoToValidate.rLocation,
-      await (await this.returnLocation).getText()
-    );
-
-    await this.validationCheck(
-      (this.infoToValidate.sDate).split(" ")[1],
-      (await (await this.startDate).getValue()).split(" ")[1]
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.sTime,
-      await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
-    );
-
-    await this.validationCheck(
-      (this.infoToValidate.eDate).split(" ")[1],
-      (await (await this.endDate).getValue()).split(" ")[1]
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.eTime,
-      await (await this.endTime).getText()
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.country,
-      await (await this.country).getText()
-    );
-
-    await this.validationCheck(this.infoToValidate.age,await (await $(`//*[@name="age"][1]`)).getValue());
-    
-    this.infoToValidate = [];
-    console.log(`${CYAN} Validation Finish! ${DEFAULT}`);
-  }
-
-  async validateInfoNegative() {
-    //console.log(TestID);
-    await this.waitForBrowserLoading();
-    await expect(await browser.getUrl()).toContain("search");
-    
-    await this.validationCheck(
-      this.infoToValidate.pLocation,
-      await (await this.pickupLocation).getText()
-    );
-  
-    await this.validationCheck(
-      this.infoToValidate.rLocation,
-      await (await this.returnLocation).getText()
-    );
-
-    await this.validationCheck(
-      (this.infoToValidate.sDate).split(" ")[1],
-      (await (await this.startDate).getValue()).split(" ")[1]
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.sTime,
-      await (await $(`//*[contains(@id,'select2-start_time')][1]`)).getText()
-    );
-
-    await this.validationCheck(
-      (this.infoToValidate.eDate).split(" ")[1],
-      (await (await this.endDate).getValue()).split(" ")[1]
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.eTime,
-      await (await this.endTime).getText()
-    );
-
-    await this.validationCheck(
-      this.infoToValidate.country,
-      await (await this.country).getText()
-    );
-
-    await this.validationCheck(this.infoToValidate.age,await (await $(`//*[@name="age"][1]`)).getValue());
-    
-    this.infoToValidate = [];
-    console.log(`${CYAN} Validation Finish! ${DEFAULT}`);
+    let ageInput = this.infoToValidate.age;
+    console.log("Age: " + ageInput);
+    if (ageInput < 18 || ageInput > 80) {
+      let alert = await browser.getAlertText();
+      console.log(alert)
+      let alertAppear =  alert.length > 0
+      chai.expect(alertAppear).true;
+      await this.validationCheck(
+        alert,
+        "A valid driver age is between 18 and 80 years."
+      );
+      console.log(`${CYAN} Invalid age case! ${DEFAULT}`);
+      await browser.acceptAlert();
+    } else if (ageInput < 25 || ageInput > 65) {
+      let chargeNote = await $(`.js-surcharge-note`);
+      chai.expect(await chargeNote.isDisplayed()).true;
+      await this.infoCorrectionCheck();
+    } else {
+      await this.infoCorrectionCheck();
+    }
+    //console.log(`${CYAN} Abnormal cases validation finish! ${DEFAULT}`);
   }
 }
 

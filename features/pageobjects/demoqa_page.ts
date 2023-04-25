@@ -33,7 +33,6 @@ class DemoQAPageObject extends AbstractPage {
   async assertLink(element) {
     await browser.setupInterceptor();
     await this.click(element);
-    //await browser.debug();
     let request = await browser.getRequest(0);
     let expectedCode = await (await this.statusCodeFromPage).getText();
     let expectedText = await (await this.statusTextFromPage).getText();
@@ -70,9 +69,8 @@ class DemoQAPageObject extends AbstractPage {
 
       if(request.ok){
         let result = await request.json();
-        console.log(result);
-        this.account.userid = result.userID;
-        this.account.token = result.token;
+        //console.log(result);
+        this.account.userid = result.userId;
       }
       else{
         console.log("Login failed!")
@@ -83,9 +81,39 @@ class DemoQAPageObject extends AbstractPage {
     
   }
 
+  async generateToken() {
+    try {
+      const loginData = {
+        userName: this.account.username,
+        password: this.account.password
+      };
+      
+      const request = await fetch(
+       'https://demoqa.com/Account/v1/GenerateToken',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      })
+
+      if(request.ok){
+        let result = await request.json();
+        //console.log(result);
+        this.account.token = result.token;
+      }
+      else{
+        console.log("Generate token failed!")
+      }
+    } catch (err) {
+      console.log(`${RED} Error: ${err} ${DEFAULT}`)
+    }
+    
+  }
+
   async signupRequest() {
     try {
-      this.account.username = "test_user" + this.generateRandomString();
+      this.account.username = "test_user" + this.generateRandomString(6);
       this.account.password = "P@ssword1234!"; 
       const signupData = {
         userName: this.account.username,
@@ -102,9 +130,8 @@ class DemoQAPageObject extends AbstractPage {
       })
 
       if(request.ok){
-        let result = await request.json();
-        console.log(result);
-        //this.account.userid = await request.
+        console.log("Signup succesful!")
+        //console.log(result);
       }
       else{
         console.log("Signup failed!")
@@ -122,13 +149,11 @@ class DemoQAPageObject extends AbstractPage {
         url,{
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer ' + this.account.token
+          Authorization: 'Bearer ' + this.account.token
         }
       })
       if(request.ok){
-        let result = await request.json();
-        console.log(result);
-        //this.account.userid = await request.
+        console.log("Get user info successfully!");
       }
       else{
         console.log("Get user info failed!")
@@ -146,15 +171,22 @@ class DemoQAPageObject extends AbstractPage {
 
   async clearUp(){
     try {
-      console.log(`https://demoqa.com/Account/v1/User/${this.account.userid}`);
+      //https://demoqa.com/Account/v1/User/e8f7cb1d-2075-44b4-b046-29f4784a1436
+      let url = "https://demoqa.com/Account/v1/User/" + this.account.userid;
+      // console.log(this.account)
+      // console.log(this.account.userid);
       const request = await fetch(
-       `https://demoqa.com/Account/v1/User/${this.account.userid}`,{
-        method: 'DELETE'
+        url,{
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer ' + this.account.token
+        }
       })
       if(request.ok){
-        let result = await request.json();
-        console.log(result);
-        //this.account.userid = await request.
+        // let result = await request.json();
+        // console.log(result);
+        console.log("Successfully delete user!")
+        this.account = [];
       }
       else{
         console.log("Clearup failed!")

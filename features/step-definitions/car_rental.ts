@@ -8,12 +8,13 @@ import HomePage from "../pageobjects/carrental_homepage.js";
 Given(/^User at the home page of Airport Car Rental$/, async () => {
   //console.log(`Test ID: ${this.testID}`);
   //console.log(`Test ID: ${this.urlE2E}`);
+  await browser.pause(2000)
   await HomePage.navigateTo("https://www.airportrentals.com/");
   await browser.refresh();
   // if (TestID == "TC-E2E-001a") {
   //   await browser.pause(10000);
   // }
-  await browser.pause(8000)
+  //await browser.pause(8000)
 });
 
 When(
@@ -49,6 +50,3 @@ Then(/^Validate the information after search$/, async() =>{
   await HomePage.validateInfo();
 })
 
-Then(/^Validate the message$/, async() =>{
-  await HomePage.validateInfoNegative();
-})

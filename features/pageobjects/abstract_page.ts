@@ -93,10 +93,10 @@ export default class AbstractPage {
     );
   }
 
-  generateRandomString() {
+  generateRandomString(num) {
     const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let result = "";
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < num; i++) {
       const randomIndex = Math.floor(Math.random() * chars.length);
       result += chars[randomIndex];
     }

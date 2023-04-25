@@ -22,19 +22,37 @@ Then(/^I check responses of the links$/, async () => {
 Then(/^I check signup feature$/, async () => {
   //await demoPage.navigateTo("https://demoqa.com/");
   await demoPage.signupRequest();
+  await demoPage.generateToken();
   await demoPage.loginRequest();
   await demoPage.getUserInfo();
+  await demoPage.clearUp();
 });
 
 Then(/^I check login feature$/, async () => {
+  await demoPage.signupRequest();
   await demoPage.navigateTo("https://demoqa.com/login");
   await demoPage.login();
 });
 
 Then(/^I verify and clearup$/, async () => {
-  await browser.pause(5000);
+  const delBut = await $('//button[text()="Delete Account"]');
+  await delBut.waitForClickable();
   chai.expect(await (await $(`.ReactTable`)).isExisting()).true;
-  await demoPage.clearUp();
+  await delBut.click();
+  const isAlertOpen = await browser.isAlertOpen();
+  if (isAlertOpen) {
+    const confirmMessage = await browser.getAlertText(); //returns the confirm box text
+    console.log("The confirm message is: " + confirmMessage);
+    await browser.dismissAlert();
+  } //logs the text
+  else{
+    console.log("Clearing...")
+    await (await $(`#closeSmallModal-ok`)).click();
+    await browser.pause(1000);
+    await browser.acceptAlert();
+    console.log("All cleared!")
+  }
+  chai.expect(await (await $(`#login`)).isExisting()).true;
 });
 
 /**
