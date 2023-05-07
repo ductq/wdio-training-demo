@@ -299,7 +299,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async submit() {
-    // console.log(`${CYAN} Submit! ${DEFAULT}`);
+    //Save the input data to infoToValidate to check later
     this.infoToValidate.pLocation = await (await this.pickupLocation).getText();
     //console.log(this.infoToValidate.pLocation)
     (this.infoToValidate.rLocation = await (
