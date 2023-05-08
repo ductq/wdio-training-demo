@@ -7,8 +7,11 @@ import AbstractPage from "./abstract_page.js";
  */
 class CarRentalPageObject extends AbstractPage {
   infoToValidate: any;
+  booleanED: boolean;
+  numOP: string;
   constructor() {
     super();
+    this.booleanED = false;
     this.infoToValidate = {
       pLocation: "",
       rLocation: "",
@@ -19,8 +22,11 @@ class CarRentalPageObject extends AbstractPage {
       country: "",
       age: "",
     };
+    this.numOP = "";
   }
-
+  /**
+   * Selector area
+   */
   get pickupLocation() {
     return $("//span[contains(@id,'select2-pickup_location')]");
   }
@@ -76,6 +82,55 @@ class CarRentalPageObject extends AbstractPage {
   get submitBtn() {
     return $('//div[@class="section-submit"]/button');
   }
+
+  get enhanceCleaningCheckBox() {
+    return $(`//input[@name = 'benefittick']`);
+  }
+
+  get instantConfirmationCheckBox() {
+    return $(`//input[@name = 'availability']`);
+  }
+
+  set numOfPeople(nop) {
+    this.numOP = `#desktop-people-${nop}`;
+  }
+
+  get numOfPeople(){
+    return $(this.numOP);
+  }
+
+  get checkBoxesSuggested(){
+    return $$('[data-key="suggested"] input[type="checkbox"]');
+  }
+
+  get checkBoxesNumOfPeople(){
+    return $$('[data-key="people"] input[type="checkbox"]');
+  }
+
+  get checkBoxesLocationType(){
+    return $$('[data-key="locationtype"] input[type="checkbox"]');
+  }
+
+  get checkBoxesTransmission(){
+    return $$('[data-key="transmission"] input[type="checkbox"]');
+  }
+  
+  get checkBoxesCarType(){
+    return $$('[data-key="categoryid"] input[type="checkbox"]');
+  }
+
+  get checkBoxesRentalCompany(){
+    return $$('[data-key="companyid"] input[type="checkbox"]');
+  }
+
+  get checkBoxes
+  (){
+    return $$('[data-key="locationtype"] input[type="checkbox"]');
+  }
+  /**
+   * End of Selector area
+   */
+
   //Click on the first result of the dynamic drop down list
   async clickOnFirstResult() {
     await this.click(
@@ -132,93 +187,106 @@ class CarRentalPageObject extends AbstractPage {
     const curDateTimestamp = curDate.getTime();
 
     //Compare input date with current date
-    if (dateInputTimestamp > curDateTimestamp) {
-      //Convert month of the input date to String, eg: 4 -> April
-      const monthName = dateObj.toLocaleString("default", { month: "long" });
-
-      //Selector for the date that appears in the date time picker
-      let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
-
-      //Get the DATE (Month Year) appears in the date time picker
-      let monthYear = await dateOnCalendar.getText();
-
-      //Get the display year by spliting the date from the date time picker
-      let yearOnCalendar = monthYear.split(" ")[1].trim();
-
-      //Click on the DATE to change to month selection view
-      await this.click(await dateOnCalendar);
-
-      //Selector for the DATE after view change from the click action of the above line of code
-      dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
-
-      //Click on the DATE to change to year selection view
-      await this.click(await dateOnCalendar);
-
-      //Selector for the DATE after view change from the click action of the above line of code
-      dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
-
-      //Get the decade - first 3 character that appears in the date time picker, e.g: 2020-2029 -> decade: 202
-      let decade = (await dateOnCalendar.getText()).substring(0, 3);
-
-      if (
-        parseInt(year.substring(0, 3)) >
-        parseInt(yearOnCalendar.substring(0, 3))
-      ) {
-        //Case that the input date's decade is bigger than the current decade
-
-        //Next button for decade
-        let next = await $("(//th[@class='next'])[3]");
-        //Loop until decade is no longer bigger
-        while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
-          await this.click(next);
-          decade = (await dateOnCalendar.getText()).substring(0, 3);
-        }
-      } else if (
-        parseInt(year.substring(0, 3)) <
-        parseInt(yearOnCalendar.substring(0, 3))
-      ) {
-        //Case that the input date's decade is smaller than the current decade
-
-        //Previous button for decade
-        let prev = await $("(//th[@class='prev'])[3]");
-        //Loop until decade is no longer smaller
-        while (parseInt(year.substring(0, 3)) < parseInt(decade)) {
-          await this.click(prev);
-          decade = (await dateOnCalendar.getText()).substring(0, 3);
-        }
-      }
-      //Get all the years on the picker then click on the year that match the input
-      let years = await $$(".year");
-      for (let y of years) {
-        if ((await y.getText()) === year) {
-          await this.click(y);
-          break;
-        }
-      }
-      //Get all the months on the picker then click on the month that match the input
-      let months = await $$(".month");
-      for (let m of months) {
-        if ((await m.getText()) === monthName.substring(0, 3)) {
-          await this.click(m);
-          break;
-        }
-      }
-      //Get all the days (filter the ones that does not belong to the selected month) on the picker then click on the day that match the input
-      let days = (await $$("tbody td")).filter(
-        async (tdElement) => (await tdElement.getAttribute("class")) === "day"
-      );
-      for (let d of days) {
-        if (parseInt(await d.getText()) === parseInt(day)) {
-          await this.click(d);
-          break;
-        }
-      }
-    } else if (dateInputTimestamp < curDateTimestamp) {
+    // if (dateInputTimestamp > curDateTimestamp) {
+    // } else
+    if (dateInputTimestamp < curDateTimestamp) {
       console.log(
-        "The input date has already passed. Today will be automatically chosen."
+        "The input date has already passed. If it is start date then today will be automatically chosen, if end date then 30 days from today will be chosen."
       );
-    } else {
-      console.log("The date is today.");
+      if (this.booleanED) {
+        let futureDate = new Date(); // create a new date object for the future
+        futureDate.setDate(curDate.getDate() + 30); // set the date to 30 days in the future
+        year = futureDate.getFullYear().toString();
+        month = futureDate.getMonth().toString();
+        day = futureDate.getDate().toString();
+      }
+      else {
+        year = curDate.getFullYear().toString();
+        month = curDate.getMonth().toString();
+        day = curDate.getDate().toString();
+      }
+    }
+    // else {
+    //   console.log("The date is today.");
+    // }
+
+    //Convert month of the input date to String, eg: 4 -> April
+    const monthName = dateObj.toLocaleString("default", { month: "long" });
+
+    //Selector for the date that appears in the date time picker
+    let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
+
+    //Get the DATE (Month Year) appears in the date time picker
+    let monthYear = await dateOnCalendar.getText();
+
+    //Get the display year by spliting the date from the date time picker
+    let yearOnCalendar = monthYear.split(" ")[1].trim();
+
+    //Click on the DATE to change to month selection view
+    await this.click(await dateOnCalendar);
+
+    //Selector for the DATE after view change from the click action of the above line of code
+    dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
+
+    //Click on the DATE to change to year selection view
+    await this.click(await dateOnCalendar);
+
+    //Selector for the DATE after view change from the click action of the above line of code
+    dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
+
+    //Get the decade - first 3 character that appears in the date time picker, e.g: 2020-2029 -> decade: 202
+    let decade = (await dateOnCalendar.getText()).substring(0, 3);
+
+    if (
+      parseInt(year.substring(0, 3)) > parseInt(yearOnCalendar.substring(0, 3))
+    ) {
+      //Case that the input date's decade is bigger than the current decade
+
+      //Next button for decade
+      let next = await $("(//th[@class='next'])[3]");
+      //Loop until decade is no longer bigger
+      while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
+        await this.click(next);
+        decade = (await dateOnCalendar.getText()).substring(0, 3);
+      }
+    } else if (
+      parseInt(year.substring(0, 3)) < parseInt(yearOnCalendar.substring(0, 3))
+    ) {
+      //Case that the input date's decade is smaller than the current decade
+
+      //Previous button for decade
+      let prev = await $("(//th[@class='prev'])[3]");
+      //Loop until decade is no longer smaller
+      while (parseInt(year.substring(0, 3)) < parseInt(decade)) {
+        await this.click(prev);
+        decade = (await dateOnCalendar.getText()).substring(0, 3);
+      }
+    }
+    //Get all the years on the picker then click on the year that match the input
+    let years = await $$(".year");
+    for (let y of years) {
+      if ((await y.getText()) === year) {
+        await this.click(y);
+        break;
+      }
+    }
+    //Get all the months on the picker then click on the month that match the input
+    let months = await $$(".month");
+    for (let m of months) {
+      if ((await m.getText()) === monthName.substring(0, 3)) {
+        await this.click(m);
+        break;
+      }
+    }
+    //Get all the days (filter the ones that does not belong to the selected month) on the picker then click on the day that match the input
+    let days = (await $$("tbody td")).filter(
+      async (tdElement) => (await tdElement.getAttribute("class")) === "day"
+    );
+    for (let d of days) {
+      if (parseInt(await d.getText()) === parseInt(day)) {
+        await this.click(d);
+        break;
+      }
     }
   }
 
@@ -249,6 +317,7 @@ class CarRentalPageObject extends AbstractPage {
       pLocation,
       ""
     );
+    //await browser.pause(1500);
 
     let chkBoxStatus = await (await this.returnLocation).isDisplayed();
     //console.log("Same location checkbox status: " + chkBoxStatus);
@@ -276,7 +345,9 @@ class CarRentalPageObject extends AbstractPage {
 
     //console.log("End date");
     await this.click(await this.endDate);
+    this.booleanED = true;
     await this.dateTimePickerHandler(eDate);
+    this.booleanED = false;
 
     //console.log("End time");
     await this.click(await this.endTime);
@@ -376,8 +447,8 @@ class CarRentalPageObject extends AbstractPage {
     console.log("Age: " + ageInput);
     if (ageInput < 18 || ageInput > 80) {
       let alert = await browser.getAlertText();
-      console.log(alert)
-      let alertAppear =  alert.length > 0
+      console.log(alert);
+      let alertAppear = alert.length > 0;
       chai.expect(alertAppear).true;
       await this.validationCheck(
         alert,
@@ -394,6 +465,10 @@ class CarRentalPageObject extends AbstractPage {
     }
     //console.log(`${CYAN} Abnormal cases validation finish! ${DEFAULT}`);
   }
+
+  async changeOptions() {}
+
+  async validateCarListingResult() {}
 }
 
 export default new CarRentalPageObject();

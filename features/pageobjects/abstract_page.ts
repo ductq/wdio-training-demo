@@ -16,21 +16,21 @@ export default class AbstractPage {
 
   //Click on an element
   async click(ele: WebdriverIO.Element) {
-    await ele.waitForClickable({ timeout: 6000 });
+    await ele.waitForClickable({ timeout: 10000 });
     if (!ele.elementId) {
       throw Error(ele.error.message);
     }
     await ele.click();
-    await browser.pause(500);
+    await browser.pause(1000);
   }
   //Type into an element
   async typeInto(ele: WebdriverIO.Element, text: string) {
-    await ele.waitForExist({ timeout: 6000 });
+    await ele.waitForExist({ timeout: 10000 });
     if (!ele.elementId) {
       throw Error(ele.error.message);
     }
     await ele.setValue(text);
-    await browser.pause(500);
+    await browser.pause(1000);
   }
 
   async writeToJsonFile(content: any, filePath: string) {
