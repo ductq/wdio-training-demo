@@ -95,37 +95,44 @@ class CarRentalPageObject extends AbstractPage {
     this.numOP = `#desktop-people-${nop}`;
   }
 
-  get numOfPeople(){
+  get numOfPeople() {
     return $(this.numOP);
   }
 
-  get checkBoxesSuggested(){
-    return $$('[data-key="suggested"] input[type="checkbox"]');
+  get checkBoxesSuggested() {
+    return $$(`[data-key="suggested"] input[type="checkbox"]`);
   }
 
-  get checkBoxesNumOfPeople(){
-    return $$('[data-key="people"] input[type="checkbox"]');
+  get checkBoxesNumOfPeople() {
+    return $$(`[data-key="people"] input[type="checkbox"]`);
   }
 
-  get checkBoxesLocationType(){
-    return $$('[data-key="locationtype"] input[type="checkbox"]');
+  get checkBoxesLocationType() {
+    return $$(`[data-key="locationtype"] input[type="checkbox"]`);
   }
 
-  get checkBoxesTransmission(){
-    return $$('[data-key="transmission"] input[type="checkbox"]');
-  }
-  
-  get checkBoxesCarType(){
-    return $$('[data-key="categoryid"] input[type="checkbox"]');
+  get checkBoxesTransmission() {
+    return $$(`[data-key="transmission"] input[type="checkbox"]`);
   }
 
-  get checkBoxesRentalCompany(){
-    return $$('[data-key="companyid"] input[type="checkbox"]');
+  get checkBoxesCarType() {
+    return $$(`[data-key="categoryid"] input[type="checkbox"]`);
   }
 
-  get checkBoxes
-  (){
-    return $$('[data-key="locationtype"] input[type="checkbox"]');
+  get checkBoxesRentalCompany() {
+    return $$(`[data-key="companyid"] input[type="checkbox"]`);
+  }
+
+  get checkBoxesDamageExcess() {
+    return $$(`[data-key="excess"] input[type="checkbox"]`);
+  }
+
+  get checkBoxesPaymentType() {
+    return $$(`[data-key="paymenttype"] input[type="checkbox"]`);
+  }
+
+  get carResults() {
+    return $$(`//ul[@class='resultsGroup']/li`);
   }
   /**
    * End of Selector area
@@ -140,7 +147,10 @@ class CarRentalPageObject extends AbstractPage {
   //Click on the random result of the dynamic drop down list
   async clickOnRandomResult(eList) {
     let randomIndex = Math.floor(Math.random() * eList.length);
-    await this.click(eList[randomIndex]);
+    console.log(randomIndex);
+    console.log(eList);
+    console.log(await eList[randomIndex]);
+    await this.click(await eList[randomIndex]);
   }
   /**
    * WIP
@@ -199,8 +209,7 @@ class CarRentalPageObject extends AbstractPage {
         year = futureDate.getFullYear().toString();
         month = futureDate.getMonth().toString();
         day = futureDate.getDate().toString();
-      }
-      else {
+      } else {
         year = curDate.getFullYear().toString();
         month = curDate.getMonth().toString();
         day = curDate.getDate().toString();
@@ -466,9 +475,47 @@ class CarRentalPageObject extends AbstractPage {
     //console.log(`${CYAN} Abnormal cases validation finish! ${DEFAULT}`);
   }
 
-  async changeOptions() {}
+  async checkboxesHandler(elements) {
+    const enabledElements = await elements.filter(
+      (el) =>
+        !el.getAttribute("disabled") ||
+        el.getAttribute("disabled") !== "disabled"
+    );
+    console.log(enabledElements.length)
+    if (enabledElements.length > 0) {
+      await this.clickOnRandomResult(enabledElements);
+    }
+  }
 
-  async validateCarListingResult() {}
+  async changeOptions() {
+    await this.checkboxesHandler(await this.checkBoxesSuggested);
+    await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
+    await this.checkboxesHandler(await this.checkBoxesLocationType);
+    await this.checkboxesHandler(await this.checkBoxesTransmission);
+    await this.checkboxesHandler(await this.checkBoxesCarType);
+    await this.checkboxesHandler(await this.checkBoxesRentalCompany);
+    await this.checkboxesHandler(await this.checkBoxesDamageExcess);
+    await this.checkboxesHandler(await this.checkBoxesPaymentType);
+  }
+
+  async validateCarListingResult() {
+    let cars = await this.carResults;
+    for (let car of cars){
+      let carDetail = await car.$(`.carDetail`);
+      console.log("Car model: ", await (await carDetail.$(`.carModel`)).getText());
+      console.log("Car type: ", await (await carDetail.$(`.carType`)).getText());
+      if (await (await carDetail.$(`.bonus`)).isExisting()){
+      console.log("Car type: ", await (await carDetail.$(`.bonus`)).getText());
+    }
+      let features = (await carDetail.$(`.carFeatures`))
+      console.log(features)
+      
+      // for (let f of features){
+      //   console.log(await (await f.$('span:nth-of-type(2)')).getText());
+      // }
+
+    }
+  }
 }
 
 export default new CarRentalPageObject();
