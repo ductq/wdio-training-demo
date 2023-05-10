@@ -30,6 +30,19 @@ class DemoQAPageObject extends AbstractPage {
     return $(`//b[2]`);
   }
 
+  get getBookList(){
+    return $$(`[class="rt-tr-group"]`)
+  }
+  get getTitle(){
+    return $$(`[class="rt-tr-group"] a`)
+  }
+  get getAuthor(){
+    return $$(`div.rt-tr-group div:nth-child(3)`)
+  }
+  get getPublisher(){
+    return $$(`div.rt-tr-group div:nth-child(4)`)
+  }
+
   async assertLink(element) {
     await browser.setupInterceptor();
     await this.click(element);
@@ -194,6 +207,34 @@ class DemoQAPageObject extends AbstractPage {
     } catch (err) {
       console.log(`${RED} Error: ${err} ${DEFAULT}`)
     }
+  }
+
+  async getAllBooks(){
+
+      const items = [];
+  
+      // Loop through the name elements and create a new item object for each one
+      let a = await this.getBookList;
+      let titles = await this.getTitle;
+      let authors = await this.getAuthor;
+      let publishers = await this.getPublisher;
+      for (let i = 0; i < a.length; i++) {
+        const name = titles[i];
+        const author = authors[i];
+        const publisher = publishers[i];
+        if (typeof name == "undefined"){
+          break;
+        }
+        const item = {
+          Title: await name.getText(),
+          Author: await author.getText(),
+          Publisher: await publisher.getText(),
+        };
+        console.log(item);
+        items.push(item);
+      }
+  
+      console.log(items);   
   }
 }
 

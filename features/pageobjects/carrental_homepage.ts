@@ -100,7 +100,7 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get checkBoxesSuggested() {
-    return $$(`[data-key="suggested"] input[type="checkbox"]`);
+    return $(`//*[@data-key='suggested']//div[contains(@class,'pull-left')]/span`);
   }
 
   get checkBoxesNumOfPeople() {
@@ -140,18 +140,18 @@ class CarRentalPageObject extends AbstractPage {
 
   //Click on the first result of the dynamic drop down list
   async clickOnFirstResult() {
-    await this.click(
-      await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
-    );
+    // await browser.waitUntil(async () =>
+    //   (
+    //     await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
+    //   ).isClickable()
+    // );
+    await (await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')).click();
+    // await this.click(
+    //   await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
+    //   //await $(`[class='select2-results__option'][role='option']:nth-child(1)`)
+    // );
   }
-  //Click on the random result of the dynamic drop down list
-  async clickOnRandomResult(eList) {
-    let randomIndex = Math.floor(Math.random() * eList.length);
-    console.log(randomIndex);
-    console.log(eList);
-    console.log(await eList[randomIndex]);
-    await this.click(await eList[randomIndex]);
-  }
+
   /**
    * WIP
    * Function created in order to process the dropdown list results dynamically
@@ -178,7 +178,7 @@ class CarRentalPageObject extends AbstractPage {
     key: string
   ) {
     if (key === "") {
-      await this.typeInto(element, input);
+      await this.typeInto(await element, input);
     }
     await this.processResultDDL(key);
   }
@@ -326,11 +326,13 @@ class CarRentalPageObject extends AbstractPage {
       pLocation,
       ""
     );
-    //await browser.pause(1500);
-
+    await browser.pause(1500);
+    
+    //await browser.waitUntil(async ()=> !((await $(`span.select2-results`)).isDisplayed()))
     let chkBoxStatus = await (await this.returnLocation).isDisplayed();
     //console.log("Same location checkbox status: " + chkBoxStatus);
     if (!chkBoxStatus) {
+      //await this.click(await this.sameLocationCheckBox)
       await (await this.sameLocationCheckBox).click();
     }
 
@@ -475,20 +477,34 @@ class CarRentalPageObject extends AbstractPage {
     //console.log(`${CYAN} Abnormal cases validation finish! ${DEFAULT}`);
   }
 
+  //Click on the random chosen element from the list of elements
+  async clickOnRandomResult(eList) {
+    let randomIndex = Math.floor(Math.random() * eList.length);
+    let chkBox = await (await eList)[randomIndex];
+    await this.click(chkBox);
+  }
+
   async checkboxesHandler(elements) {
+    await this.writeToJsonFile(elements,"results/checkBoxElements.json");
     const enabledElements = await elements.filter(
       (el) =>
         !el.getAttribute("disabled") ||
         el.getAttribute("disabled") !== "disabled"
     );
-    console.log(enabledElements.length)
-    if (enabledElements.length > 0) {
-      await this.clickOnRandomResult(enabledElements);
+    console.log(enabledElements.length);
+    if (enabledElements.length > 1) {
+      await this.clickOnRandomResult(await enabledElements);
+    } else if (enabledElements.length == 1) {
+      let chkBox = await (await enabledElements)[0];
+      await chkBox.click();
+    } else {
+      console.log("No checkboxes available");
     }
   }
 
   async changeOptions() {
-    await this.checkboxesHandler(await this.checkBoxesSuggested);
+    await this.checkboxesHandler(await this.checkBoxesSuggested.$$(`//div[contains(@class,'pull-left')]/span`));
+    await browser.pause(3000);
     await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
     await this.checkboxesHandler(await this.checkBoxesLocationType);
     await this.checkboxesHandler(await this.checkBoxesTransmission);
@@ -500,20 +516,28 @@ class CarRentalPageObject extends AbstractPage {
 
   async validateCarListingResult() {
     let cars = await this.carResults;
-    for (let car of cars){
+    for (let car of cars) {
       let carDetail = await car.$(`.carDetail`);
-      console.log("Car model: ", await (await carDetail.$(`.carModel`)).getText());
-      console.log("Car type: ", await (await carDetail.$(`.carType`)).getText());
-      if (await (await carDetail.$(`.bonus`)).isExisting()){
-      console.log("Car type: ", await (await carDetail.$(`.bonus`)).getText());
-    }
-      let features = (await carDetail.$(`.carFeatures`))
-      console.log(features)
-      
+      console.log(
+        "Car model: ",
+        await (await carDetail.$(`.carModel`)).getText()
+      );
+      console.log(
+        "Car type: ",
+        await (await carDetail.$(`.carType`)).getText()
+      );
+      if (await (await carDetail.$(`.bonus`)).isExisting()) {
+        console.log(
+          "Car type: ",
+          await (await carDetail.$(`.bonus`)).getText()
+        );
+      }
+      let features = await carDetail.$(`.carFeatures`);
+      console.log(features);
+
       // for (let f of features){
       //   console.log(await (await f.$('span:nth-of-type(2)')).getText());
       // }
-
     }
   }
 }
