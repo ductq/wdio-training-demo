@@ -39,18 +39,31 @@ Then(/^I verify and clearup$/, async () => {
   await delBut.waitForClickable();
   chai.expect(await (await $(`.ReactTable`)).isExisting()).true;
   await delBut.click();
-  const isAlertOpen = await browser.isAlertOpen();
+  //const isAlertOpen = await browser.isAlertOpen();
+  await browser.pause(2000);
+  let isAlertOpen: boolean;
+  await browser.debug();
+  try {
+    await browser.getAlertText();
+    isAlertOpen = true;
+  } catch (error) {
+    if (error.name === 'no such alert') {
+      isAlertOpen = false;
+    } else {
+      throw error;
+    }
+  }
   if (isAlertOpen) {
     const confirmMessage = await browser.getAlertText(); //returns the confirm box text
     console.log("The confirm message is: " + confirmMessage);
     await browser.dismissAlert();
   } //logs the text
-  else{
-    console.log("Clearing...")
+  else {
+    console.log("Clearing...");
     await (await $(`#closeSmallModal-ok`)).click();
     await browser.pause(1000);
     await browser.acceptAlert();
-    console.log("All cleared!")
+    console.log("All cleared!");
   }
   chai.expect(await (await $(`#login`)).isExisting()).true;
 });
