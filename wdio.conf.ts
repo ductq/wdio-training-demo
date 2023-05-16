@@ -90,7 +90,7 @@ export const config: Options.Testrunner = {
               ]
             : [],
             extensions: [
-              fs.readFileSync("../AutoTestTraining-Demo/1.49.0_0.crx").toString("base64"),
+              fs.readFileSync(`${process.cwd()}/1.49.0_0.crx`).toString("base64"),
             ]
       },
       // If outputDir is provided WebdriverIO can capture driver session logs

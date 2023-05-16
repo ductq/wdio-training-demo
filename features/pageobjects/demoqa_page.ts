@@ -6,7 +6,9 @@ import {
   getStatusCode,
 } from "http-status-codes";
 import AbstractPage from "./abstract_page.js";
-
+import apiHelper from "../../features/helper/apiHelper.js";
+import fs from "fs";
+import path from "path";
 /**
  * sub page containing specific selectors and methods for a specific page
  */
@@ -211,8 +213,8 @@ class DemoQAPageObject extends AbstractPage {
         },
       });
       if (request.ok) {
-        // let result = await request.json();
-        // console.log(result);
+        let result = await request.json();
+        console.log("Delete result:" + result);
         console.log("Successfully delete user!");
         this.account = [];
       } else {
@@ -248,6 +250,77 @@ class DemoQAPageObject extends AbstractPage {
     }
 
     console.log(items);
+  }
+
+  async addBookToUser() {
+    try {
+      const bookData = {
+        userId: this.account.userid,
+        collectionOfIsbns: [
+          {
+            isbn: "9781491904244",
+          },
+        ],
+      };
+
+      const request = await fetch("https://demoqa.com/BookStore/v1/Books", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + this.account.token,
+        },
+        body: JSON.stringify(bookData),
+      });
+
+      if (request.ok) {
+        console.log("Adding Book succesful!");
+        let result = await request.json();
+        console.log(result);
+        //this.account.userid = result.userId;
+      } else {
+        console.log("Adding Book failed!");
+        let result = await request.json();
+        console.log(result);
+      }
+    } catch (err) {
+      console.log(`${RED} Error: ${err} ${DEFAULT}`);
+    }
+  }
+
+  async addBookToUserAPIHelper() {
+    try {
+      const bookData = {
+        userId: this.account.userid,
+        collectionOfIsbns: [
+          {
+            isbn: "9781491950296",
+          },
+        ],
+      };
+      //const dataBk = JSON.parse(JSON.stringify(bookData));
+      /**2. Make get call by using API helper */
+      let authToken = this.account.token;
+      let res;
+      let baseurl = "https://demoqa.com/";
+      let endpoint = "BookStore/v1/Books";
+      await browser.call(async function () {
+        res = await apiHelper.POST(TestID, baseurl, endpoint, authToken, bookData);
+      });
+
+      /** 3.Store results*/
+      let data = JSON.stringify(res.body, undefined, 4);
+      const dir = path.join(process.cwd(), "results");
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+      }
+
+      const filename = path.join(dir, "APIUsers.json");
+
+      fs.writeFileSync(filename, data);
+    } catch (err) {
+      err.message = `${TestID}: Failed at getting API users from reqres, ${err.message}`;
+      throw err;
+    }
   }
 }
 

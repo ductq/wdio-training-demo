@@ -25,6 +25,7 @@ Then(/^I check signup feature$/, async () => {
   await demoPage.generateToken();
   await demoPage.loginRequest();
   await demoPage.getUserInfo();
+  await demoPage.addBookToUserAPIHelper();
   await demoPage.clearUp();
 });
 
