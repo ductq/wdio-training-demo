@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import chai from "chai";
 /**
  * main page object containing all methods, selectors and functionality
@@ -35,7 +36,16 @@ export default class AbstractPage {
 
   async writeToJsonFile(content: any, filePath: string) {
     let path = `${process.cwd()}/${filePath}`;
-    fs.writeFile(path, JSON.stringify(JSON.stringify(content)), (err) => {
+    const dir = path.substring(0, path.lastIndexOf("/"));
+    if (!fs.existsSync(dir)) {
+      console.log("Directory not exist, proceed to create folder!")
+      fs.mkdirSync(dir);
+    }
+    else{
+      console.log("Directory existed, proceed to writing file!")
+    }
+
+    fs.writeFile(path, JSON.stringify(content), (err) => {
       if (err) throw err;
       console.log(`Results saved to ${filePath}`);
     });
@@ -94,7 +104,8 @@ export default class AbstractPage {
   }
 
   generateRandomString(num) {
-    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const chars =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let result = "";
     for (let i = 0; i < num; i++) {
       const randomIndex = Math.floor(Math.random() * chars.length);

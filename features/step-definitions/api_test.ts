@@ -26,7 +26,9 @@ Then(/^I check signup feature$/, async () => {
   await demoPage.loginRequest();
   await demoPage.getUserInfo();
   await demoPage.addBookToUserAPIHelper();
+  await demoPage.getUserInfo();
   await demoPage.clearUp();
+  await browser.debug();
 });
 
 Then(/^I check login feature$/, async () => {
@@ -40,20 +42,19 @@ Then(/^I verify and clearup$/, async () => {
   await delBut.waitForClickable();
   chai.expect(await (await $(`.ReactTable`)).isExisting()).true;
   await delBut.click();
-  //const isAlertOpen = await browser.isAlertOpen();
-  await browser.pause(2000);
-  let isAlertOpen: boolean;
-  await browser.debug();
-  try {
-    await browser.getAlertText();
-    isAlertOpen = true;
-  } catch (error) {
-    if (error.name === 'no such alert') {
-      isAlertOpen = false;
-    } else {
-      throw error;
-    }
-  }
+  const isAlertOpen = await browser.isAlertOpen();
+  // await browser.pause(2000);
+  // let isAlertOpen: boolean;
+  // try {
+  //   await browser.getAlertText();
+  //   isAlertOpen = true;
+  // } catch (error) {
+  //   if (error.name === 'no such alert') {
+  //     isAlertOpen = false;
+  //   } else {
+  //     throw error;
+  //   }
+  // }
   if (isAlertOpen) {
     const confirmMessage = await browser.getAlertText(); //returns the confirm box text
     console.log("The confirm message is: " + confirmMessage);

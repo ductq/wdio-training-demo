@@ -1,5 +1,6 @@
 # Misc
-data
+data/allure*
+data/temp.json
 debug
 log
 results
