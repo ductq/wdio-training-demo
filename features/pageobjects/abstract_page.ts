@@ -113,4 +113,11 @@ export default class AbstractPage {
     }
     return result;
   }
+
+  getSelectors() {
+    const selectorsFilePath = path.resolve(process.cwd(), './features/pageobjects/selectors.json');
+    console.log(selectorsFilePath)
+    const selectors = JSON.parse(fs.readFileSync(selectorsFilePath).toString());
+    return selectors;
+  }
 }

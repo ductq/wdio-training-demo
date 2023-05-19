@@ -11,7 +11,7 @@ Given(/^User at the home page of Airport Car Rental$/, async () => {
   await browser.pause(2000)
   await HomePage.navigateTo("https://www.airportrentals.com/");
   //await browser.pause(2000)
-  if (TestID == "TC-E2E-001a") {
+  if (TestID == "TC-E2E-001a" || TestID == "TC-E2E-001g") {
     await browser.pause(7000);
   }
   //await browser.pause(8000)
@@ -56,5 +56,7 @@ When(/^User change desired options$/, async () => {
 
 Then(/^Verify that the search results include the correct information$/, async() =>{
   await HomePage.validateCarListingResult();
+  await browser.debug();
+  //await browser.closeWindow();
 })
 

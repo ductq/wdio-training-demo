@@ -27,7 +27,7 @@ Feature: Airport Car Rental
     Then Verify that the search results include the correct information
     Examples: Information for the booking
       | TestID      | Pickup  | Return  | Start date | Start time | End date   | End time | Country | Age |
-      | TC-E2E-001g | Newyork | Newyork | 01-01-2024 | 7:00 am    | 01-01-2024 | 5:00 pm  | Vietnam | 30  |
+      | TC-E2E-001g | Newyork | Newyork | 12-12-2023 | 7:00 am    | 01-01-2024 | 5:00 pm  | Singapore | 45  |
 # When User select a car from the search results
 # Then Verify that the car name, car type, price, location and time are correct
 # When User select extra items

@@ -161,7 +161,7 @@ export const config: Options.Testrunner = {
   // commands. Instead, they hook themselves up into the test process.
   services: [
     "chromedriver",
-    //"geckodriver",
+    "geckodriver",
     "intercept"],
 
   // Framework you want to run your specs with.

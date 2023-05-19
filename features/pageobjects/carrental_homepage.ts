@@ -2,6 +2,7 @@ import { ChainablePromiseElement } from "webdriverio";
 
 import chai, { should } from "chai";
 import AbstractPage from "./abstract_page.js";
+
 /**
  * sub page containing specific selectors and methods for a specific page
  */
@@ -9,8 +10,10 @@ class CarRentalPageObject extends AbstractPage {
   infoToValidate: any;
   booleanED: boolean;
   numOP: string;
+  selector;
   constructor() {
     super();
+    this.selector = this.getSelectors().carrental;
     this.booleanED = false;
     this.infoToValidate = {
       pLocation: "",
@@ -28,67 +31,67 @@ class CarRentalPageObject extends AbstractPage {
    * Selector area
    */
   get pickupLocation() {
-    return $("//span[contains(@id,'select2-pickup_location')]");
+    return $(this.selector.pLocation);
   }
 
   get pickupLocationField() {
-    return $("//*[contains(@aria-controls,'select2-pickup_location')]");
+    return $(this.selector.pLocationField);
   }
 
   get sameLocationCheckBox() {
-    return $('//label[@class="label_chkbox"]');
+    return $(this.selector.chkBoxSameLocation);
   }
 
   get returnLocation() {
-    return $("//span[contains(@id,'select2-dropoff_location')]");
+    return $(this.selector.rLocation);
   }
 
   get returnLocationField() {
-    return $("//*[contains(@aria-controls,'select2-dropoff_location')]");
+    return $(this.selector.rLocationField);
   }
 
   get startDate() {
-    return $(".js-datepicker-start");
+    return $(this.selector.sDate);
   }
 
   get endDate() {
-    return $(".js-datepicker-end");
+    return $(this.selector.eDate);
   }
 
   get startTime() {
-    return $("//*[contains(@id,'select2-start_time')]");
+    return $(this.selector.sTime);
   }
 
   get endTime() {
-    return $("//*[contains(@id,'select2-end_time')]");
+    return $(this.selector.eTime);
   }
 
   get countryAndAge() {
-    return $('//label[@class="js-extra-info label_chkbox"]');
+    return $(this.selector.chkBoxCountryAge);
   }
 
   get country() {
-    return $("//span[contains(@id, 'select2-country')]");
+    return $(this.selector.country);
   }
 
   get countryField() {
-    return $("//*[contains(@aria-controls,'select2-country')]");
+    return $(this.selector.countryField);
   }
 
   get age() {
-    return $('*[name="age"]');
+    return $(this.selector.age);
   }
 
   get submitBtn() {
-    return $('//div[@class="section-submit"]/button');
+    return $(this.selector.btnSubmit);
   }
 
   get enhanceCleaningCheckBox() {
-    return $(`//input[@name = 'benefittick']`);
+    return $(this.selector.chkBoxEnhanceCleaning);
   }
 
   get instantConfirmationCheckBox() {
-    return $(`//input[@name = 'availability']`);
+    return $(this.selector.chkBoxInstantConfirm);
   }
 
   set numOfPeople(nop) {
@@ -100,39 +103,39 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   get checkBoxesSuggested() {
-    return $(`//*[@data-key='suggested']//div[contains(@class,'pull-left')]/span`);
+    return $$(this.selector.chkBoxSuggested);
   }
 
   get checkBoxesNumOfPeople() {
-    return $$(`[data-key="people"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxNumOfPeople);
   }
 
   get checkBoxesLocationType() {
-    return $$(`[data-key="locationtype"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxLocationType);
   }
 
   get checkBoxesTransmission() {
-    return $$(`[data-key="transmission"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxTransmission);
   }
 
   get checkBoxesCarType() {
-    return $$(`[data-key="categoryid"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxCarType);
   }
 
   get checkBoxesRentalCompany() {
-    return $$(`[data-key="companyid"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxRentalCompany);
   }
 
   get checkBoxesDamageExcess() {
-    return $$(`[data-key="excess"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxDamageExcess);
   }
 
   get checkBoxesPaymentType() {
-    return $$(`[data-key="paymenttype"] input[type="checkbox"]`);
+    return $$(this.selector.chkBoxPaymentType);
   }
 
   get carResults() {
-    return $$(`//ul[@class='resultsGroup']/li`);
+    return $$(this.selector.carResults);
   }
   /**
    * End of Selector area
@@ -145,7 +148,8 @@ class CarRentalPageObject extends AbstractPage {
     //     await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
     //   ).isClickable()
     // );
-    await (await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')).click();
+    await (await $$(this.selector.ddlResult))[0].click()
+    //await (await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')).click();
     // await this.click(
     //   await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
     //   //await $(`[class='select2-results__option'][role='option']:nth-child(1)`)
@@ -158,7 +162,7 @@ class CarRentalPageObject extends AbstractPage {
    * @param key (string) matching string
    */
   async processResultDDL(key: string) {
-    let eleList = await $$("[class='select2-results__option'][role='option']");
+    let eleList = await $$(this.selector.ddlResult);
     if (key === "") {
       //await this.clickOnRandomResult(eleList);
       await this.clickOnFirstResult();
@@ -223,7 +227,7 @@ class CarRentalPageObject extends AbstractPage {
     const monthName = dateObj.toLocaleString("default", { month: "long" });
 
     //Selector for the date that appears in the date time picker
-    let dateOnCalendar = await $("(//th[@class='datepicker-switch'])[1]");
+    let dateOnCalendar = await $(this.selector.dtPickerMonthView);
 
     //Get the DATE (Month Year) appears in the date time picker
     let monthYear = await dateOnCalendar.getText();
@@ -235,13 +239,13 @@ class CarRentalPageObject extends AbstractPage {
     await this.click(await dateOnCalendar);
 
     //Selector for the DATE after view change from the click action of the above line of code
-    dateOnCalendar = await $("(//th[@class='datepicker-switch'])[2]");
+    dateOnCalendar = await $(this.selector.dtPickerYearView);
 
     //Click on the DATE to change to year selection view
     await this.click(await dateOnCalendar);
 
     //Selector for the DATE after view change from the click action of the above line of code
-    dateOnCalendar = await $("(//th[@class='datepicker-switch'])[3]");
+    dateOnCalendar = await $(this.selector.dtPickerDecadeView);
 
     //Get the decade - first 3 character that appears in the date time picker, e.g: 2020-2029 -> decade: 202
     let decade = (await dateOnCalendar.getText()).substring(0, 3);
@@ -252,7 +256,7 @@ class CarRentalPageObject extends AbstractPage {
       //Case that the input date's decade is bigger than the current decade
 
       //Next button for decade
-      let next = await $("(//th[@class='next'])[3]");
+      let next = await $(this.selector.dtPickerNextDecade);
       //Loop until decade is no longer bigger
       while (parseInt(year.substring(0, 3)) > parseInt(decade)) {
         await this.click(next);
@@ -264,7 +268,7 @@ class CarRentalPageObject extends AbstractPage {
       //Case that the input date's decade is smaller than the current decade
 
       //Previous button for decade
-      let prev = await $("(//th[@class='prev'])[3]");
+      let prev = await $(this.selector.dtPickerPrevDecade);
       //Loop until decade is no longer smaller
       while (parseInt(year.substring(0, 3)) < parseInt(decade)) {
         await this.click(prev);
@@ -480,31 +484,32 @@ class CarRentalPageObject extends AbstractPage {
   //Click on the random chosen element from the list of elements
   async clickOnRandomResult(eList) {
     let randomIndex = Math.floor(Math.random() * eList.length);
+    // List index starting at 0, need to be handled...???
     let chkBox = await (await eList)[randomIndex];
+    console.log("Index: " + randomIndex);
+    console.log("Checkbox: " + await chkBox.getText());
     await this.click(chkBox);
   }
 
   async checkboxesHandler(elements) {
-    await this.writeToJsonFile(elements,"results/checkBoxElements.json");
+    //await this.writeToJsonFile(elements,"results/checkBoxElements.json");
     const enabledElements = await elements.filter(
       (el) =>
         !el.getAttribute("disabled") ||
         el.getAttribute("disabled") !== "disabled"
     );
-    console.log(enabledElements.length);
-    if (enabledElements.length > 1) {
+    console.log("Length: " + enabledElements.length);
+    if (enabledElements.length >= 1) {
       await this.clickOnRandomResult(await enabledElements);
-    } else if (enabledElements.length == 1) {
-      let chkBox = await (await enabledElements)[0];
-      await chkBox.click();
-    } else {
+    } 
+     else {
       console.log("No checkboxes available");
     }
+    await browser.pause(5000);
   }
 
   async changeOptions() {
-    await this.checkboxesHandler(await this.checkBoxesSuggested.$$(`//div[contains(@class,'pull-left')]/span`));
-    await browser.pause(3000);
+    await this.checkboxesHandler(await this.checkBoxesSuggested);
     await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
     await this.checkboxesHandler(await this.checkBoxesLocationType);
     await this.checkboxesHandler(await this.checkBoxesTransmission);
@@ -516,6 +521,7 @@ class CarRentalPageObject extends AbstractPage {
 
   async validateCarListingResult() {
     let cars = await this.carResults;
+    console.log("Car results:")
     for (let car of cars) {
       let carDetail = await car.$(`.carDetail`);
       console.log(
@@ -532,13 +538,16 @@ class CarRentalPageObject extends AbstractPage {
           await (await carDetail.$(`.bonus`)).getText()
         );
       }
-      let features = await carDetail.$(`.carFeatures`);
-      console.log(features);
+      let carFeature = await carDetail.$(`.carFeatures`);
+      let features = await carFeature.$$('span:nth-of-type(2)');
 
-      // for (let f of features){
-      //   console.log(await (await f.$('span:nth-of-type(2)')).getText());
-      // }
+      for (let f of features){
+        console.log(await f.getText());
+      }
+      console.log("------------------------")
     }
+
+    
   }
 }
 
