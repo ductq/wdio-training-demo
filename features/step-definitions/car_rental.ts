@@ -56,7 +56,6 @@ When(/^User change desired options$/, async () => {
 
 Then(/^Verify that the search results include the correct information$/, async() =>{
   await HomePage.validateCarListingResult();
-  await browser.debug();
   //await browser.closeWindow();
 })
 

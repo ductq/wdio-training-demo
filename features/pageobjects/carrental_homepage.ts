@@ -86,22 +86,6 @@ class CarRentalPageObject extends AbstractPage {
     return $(this.selector.btnSubmit);
   }
 
-  get enhanceCleaningCheckBox() {
-    return $(this.selector.chkBoxEnhanceCleaning);
-  }
-
-  get instantConfirmationCheckBox() {
-    return $(this.selector.chkBoxInstantConfirm);
-  }
-
-  set numOfPeople(nop) {
-    this.numOP = `#desktop-people-${nop}`;
-  }
-
-  get numOfPeople() {
-    return $(this.numOP);
-  }
-
   get checkBoxesSuggested() {
     return $$(this.selector.chkBoxSuggested);
   }
@@ -148,7 +132,7 @@ class CarRentalPageObject extends AbstractPage {
     //     await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
     //   ).isClickable()
     // );
-    await (await $$(this.selector.ddlResult))[0].click()
+    await (await $$(this.selector.ddlResult))[0].click();
     //await (await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')).click();
     // await this.click(
     //   await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
@@ -331,7 +315,7 @@ class CarRentalPageObject extends AbstractPage {
       ""
     );
     await browser.pause(1500);
-    
+
     //await browser.waitUntil(async ()=> !((await $(`span.select2-results`)).isDisplayed()))
     let chkBoxStatus = await (await this.returnLocation).isDisplayed();
     //console.log("Same location checkbox status: " + chkBoxStatus);
@@ -486,26 +470,52 @@ class CarRentalPageObject extends AbstractPage {
     let randomIndex = Math.floor(Math.random() * eList.length);
     // List index starting at 0, need to be handled...???
     let chkBox = await (await eList)[randomIndex];
-    console.log("Index: " + randomIndex);
-    console.log("Checkbox: " + await chkBox.getText());
+    let chkBoxText = await chkBox.getText();
+    console.log("Checkbox: " + chkBoxText);
+    if (chkBoxText.includes("People")) {
+      this.numOP = chkBoxText.split(" ").at(0);
+      console.log("Number of people from checkbox: ", this.numOP);
+    }
     await this.click(chkBox);
   }
 
   async checkboxesHandler(elements) {
+    /**
+     * The commented code is for filtering the elements by select only the one that
+     * do not have attribute "disabled" OR attribute "disabled" == "disabled"
+     *
+     * It does not work as expected because:
+     *  - The "disabled" attribute belongs to input elements (checkbox)
+     *  - The input (checkbox) is not clickable
+     *  - The label is clickable so it is chosen to be selector
+     *  - The label do not have "disabled" attribute
+     */
     //await this.writeToJsonFile(elements,"results/checkBoxElements.json");
-    const enabledElements = await elements.filter(
-      (el) =>
-        !el.getAttribute("disabled") ||
-        el.getAttribute("disabled") !== "disabled"
-    );
-    console.log("Length: " + enabledElements.length);
+    // const enabledElements = await elements.filter(
+    //   (el) =>
+    //     !el.getAttribute("disabled") ||
+    //     el.getAttribute("disabled") !== "disabled"
+    // );
+
+    /**
+     * Filtering the elements by select only the ones that have number of items != 0
+     * Quite slow?
+     */
+    let enabledElements = [];
+    let label = "";
+    for (let e of elements) {
+      label = await e.getText();
+      if (!label.includes("(0)")) {
+        enabledElements.push(e);
+      }
+    }
+
     if (enabledElements.length >= 1) {
       await this.clickOnRandomResult(await enabledElements);
-    } 
-     else {
+    } else {
       console.log("No checkboxes available");
     }
-    await browser.pause(5000);
+    await browser.pause(3000);
   }
 
   async changeOptions() {
@@ -521,33 +531,36 @@ class CarRentalPageObject extends AbstractPage {
 
   async validateCarListingResult() {
     let cars = await this.carResults;
-    console.log("Car results:")
+    let numOfSeats = 0;
+    let carDetail, carType, carFeature, features;
+
+    console.log("Car results:");
     for (let car of cars) {
-      let carDetail = await car.$(`.carDetail`);
+      carDetail = await car.$(`.carDetail`);
       console.log(
         "Car model: ",
         await (await carDetail.$(`.carModel`)).getText()
       );
-      console.log(
-        "Car type: ",
-        await (await carDetail.$(`.carType`)).getText()
-      );
+      carType = await (await carDetail.$(`.carType`)).getText();
+      console.log("Car type: ", carType);
+
+      numOfSeats = parseInt(carType.split(" ").at(-2));
+      chai.expect(numOfSeats).to.be.at.greaterThanOrEqual(parseInt(this.numOP));
+
       if (await (await carDetail.$(`.bonus`)).isExisting()) {
         console.log(
           "Car type: ",
           await (await carDetail.$(`.bonus`)).getText()
         );
       }
-      let carFeature = await carDetail.$(`.carFeatures`);
-      let features = await carFeature.$$('span:nth-of-type(2)');
+      carFeature = await carDetail.$(`.carFeatures`);
+      features = await carFeature.$$("span:nth-of-type(2)");
 
-      for (let f of features){
+      for (let f of features) {
         console.log(await f.getText());
       }
-      console.log("------------------------")
+      console.log("------------------------");
     }
-
-    
   }
 }
 
