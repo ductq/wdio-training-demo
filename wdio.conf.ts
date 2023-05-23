@@ -320,7 +320,7 @@ export const config: Options.Testrunner = {
     TestID = browser.options.testID;
     global.TestID = TestID;
     //return console.log(`>> Value of world: ${JSON.stringify(world)}`);
-    return console.log(`${GREEN}>> Starting test case: ${browser.options.testID} ${DEFAULT}`);
+    return console.log(`>> Starting test case:${GREEN} ${browser.options.testID} ${DEFAULT}`);
   },
   /**
    *

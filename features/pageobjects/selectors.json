@@ -15,8 +15,6 @@
     "age": "*[name='age']",
     "btnSubmit": "//div[@class='section-submit']/button",
     "ddlResult": "[class='select2-results__options'][role='listbox'] li",
-    "chkBoxEnhanceCleaning": "//input[@name = 'benefittick']",
-    "chkBoxInstantConfirm": "//input[@name = 'availability']",
     "dtPickerMonthView": "(//th[@class='datepicker-switch'])[1]",
     "dtPickerYearView": "(//th[@class='datepicker-switch'])[2]",
     "dtPickerDecadeView": "(//th[@class='datepicker-switch'])[3]",

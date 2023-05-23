@@ -2,19 +2,15 @@
     "compilerOptions": {
         "moduleResolution": "node",
         "module": "ESNext",
+        "target": "ES2022",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
         "types": [
             "node",
             "@wdio/globals/types",
             "expect-webdriverio",
             "@wdio/cucumber-framework",
             "wdio-intercept-service"
-        ],
-        "target": "es2022",
-        "esModuleInterop": true,
-        "resolveJsonModule": true
-    },
-    "include": [
-        "src/**/*.ts",
-        "features/**/*.ts"
-    ]
+        ]
+    }
 }

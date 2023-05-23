@@ -472,9 +472,9 @@ class CarRentalPageObject extends AbstractPage {
     let chkBox = await (await eList)[randomIndex];
     let chkBoxText = await chkBox.getText();
     console.log("Checkbox: " + chkBoxText);
-    if (chkBoxText.includes("People")) {
+    if (chkBoxText.includes("People (")) {
       this.numOP = chkBoxText.split(" ").at(0);
-      console.log("Number of people from checkbox: ", this.numOP);
+      console.log("Number of people from checkbox: ", this.numOP.trim());
     }
     await this.click(chkBox);
   }
@@ -561,6 +561,7 @@ class CarRentalPageObject extends AbstractPage {
       }
       console.log("------------------------");
     }
+    console.log(`${GREEN}>> Finished checking car list! ${DEFAULT}`);
   }
 }
 
