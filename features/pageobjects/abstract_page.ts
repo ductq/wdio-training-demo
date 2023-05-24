@@ -47,7 +47,7 @@ export default class AbstractPage {
 
     fs.writeFile(path, JSON.stringify(content), (err) => {
       if (err) throw err;
-      console.log(`Results saved to ${filePath}`);
+      console.log(`Results saved to: ${filePath}`);
     });
   }
 
@@ -118,6 +118,29 @@ export default class AbstractPage {
     const selectorsFilePath = path.resolve(process.cwd(), './features/pageobjects/selectors.json');
     console.log(selectorsFilePath)
     const selectors = JSON.parse(fs.readFileSync(selectorsFilePath).toString());
-    return selectors;
+    return selectors;    
+  }
+  /**
+   * Use for case that have too many pages
+   * Read the json file, then iterate through the items and set them as global variables for easy access
+   */
+  selectorReading(){
+    const locatorPages = ['carrental', 'demoqa']
+    locatorPages.forEach((element) =>{
+      const locator = this.getSelectors()[element]
+      for (const key of Object.keys(locator)){
+        // console.log("Setting global variable: " + key)
+        // console.log("Value: " + locator[key])
+        this.globalMap(locator[key], key);
+      }
+    })
+  }
+
+  globalMap(value, variable){
+    if(global[variable]){
+      console.log(`Variable ${variable} already exist so it will be overwritten!`)
+      console.log("Current value: " + global[variable])
+    }
+    global[variable] = value;
   }
 }

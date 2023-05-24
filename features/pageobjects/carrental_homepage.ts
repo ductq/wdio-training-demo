@@ -13,7 +13,8 @@ class CarRentalPageObject extends AbstractPage {
   selector;
   constructor() {
     super();
-    this.selector = this.getSelectors().carrental;
+    this.selectorReading();
+    this.selector = this.getSelectors()["carrental"];
     this.booleanED = false;
     this.infoToValidate = {
       pLocation: "",
@@ -31,7 +32,7 @@ class CarRentalPageObject extends AbstractPage {
    * Selector area
    */
   get pickupLocation() {
-    return $(this.selector.pLocation);
+    return $(`${pLocation}`);
   }
 
   get pickupLocationField() {
@@ -307,7 +308,6 @@ class CarRentalPageObject extends AbstractPage {
     country: string,
     age: string | number
   ) {
-    //console.log("Pick up Location");
     await this.click(await this.pickupLocation);
     await this.dropDownListHandler(
       await this.pickupLocationField,
@@ -519,8 +519,11 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async changeOptions() {
-    await this.checkboxesHandler(await this.checkBoxesSuggested);
+    
     await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
+    let carList = await this.getCarList();
+    this.writeToJsonFile(carList, "results/carList.json");
+    await this.checkboxesHandler(await this.checkBoxesSuggested);
     await this.checkboxesHandler(await this.checkBoxesLocationType);
     await this.checkboxesHandler(await this.checkBoxesTransmission);
     await this.checkboxesHandler(await this.checkBoxesCarType);
@@ -530,38 +533,52 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async validateCarListingResult() {
-    let cars = await this.carResults;
-    let numOfSeats = 0;
-    let carDetail, carType, carFeature, features;
+    let carList = await this.getCarList();
+    console.log("Checking results after filtering!");
+    for (const car of carList) {
+      chai
+        .expect(parseInt(car.seats))
+        .to.be.at.greaterThanOrEqual(parseInt(this.numOP));
+    }
+    this.writeToJsonFile(carList, "results/carListAfterFiltered.json");
+    console.log(carList);
+    console.log(`${GREEN}>> Finished checking car list! ${DEFAULT}`);
+  }
 
-    console.log("Car results:");
+  async getCarList() {
+    let cars = await this.carResults;
+    let carDetail, carFeature, features, bonus;
+    let carList = [];
+
     for (let car of cars) {
       carDetail = await car.$(`.carDetail`);
-      console.log(
-        "Car model: ",
-        await (await carDetail.$(`.carModel`)).getText()
-      );
-      carType = await (await carDetail.$(`.carType`)).getText();
-      console.log("Car type: ", carType);
-
-      numOfSeats = parseInt(carType.split(" ").at(-2));
-      chai.expect(numOfSeats).to.be.at.greaterThanOrEqual(parseInt(this.numOP));
-
       if (await (await carDetail.$(`.bonus`)).isExisting()) {
-        console.log(
-          "Car type: ",
-          await (await carDetail.$(`.bonus`)).getText()
-        );
+        bonus = await (await carDetail.$(`.bonus`)).getText();
+      } else {
+        bonus = "";
       }
+      let carModel = await (await carDetail.$(`.carModel`)).getText();
+      let carType = await (await carDetail.$(`.carType`)).getText();
+      let numOS = carType.split(" ").at(-2);
+      let carObj = {
+        model: carModel,
+        type: carType,
+        seats: numOS,
+        bonus: bonus,
+        features: [],
+      };
       carFeature = await carDetail.$(`.carFeatures`);
       features = await carFeature.$$("span:nth-of-type(2)");
-
       for (let f of features) {
-        console.log(await f.getText());
+        carObj.features.push(await f.getText());
       }
-      console.log("------------------------");
+      carList.push(carObj);
+      console.log(
+        `Almost there, at: ${100 * ((car.index + 1) / cars.length)} %`
+      );
     }
-    console.log(`${GREEN}>> Finished checking car list! ${DEFAULT}`);
+
+    return carList;
   }
 }
 
