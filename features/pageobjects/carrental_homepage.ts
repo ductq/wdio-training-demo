@@ -308,21 +308,18 @@ class CarRentalPageObject extends AbstractPage {
     country: string,
     age: string | number
   ) {
+    let chkBoxStatus = await (await this.returnLocation).isDisplayed();
+    if (!chkBoxStatus) {
+      //await this.click(await this.sameLocationCheckBox)
+      await (await this.sameLocationCheckBox).click();
+    }
+
     await this.click(await this.pickupLocation);
     await this.dropDownListHandler(
       await this.pickupLocationField,
       pLocation,
       ""
     );
-    await browser.pause(1500);
-
-    //await browser.waitUntil(async ()=> !((await $(`span.select2-results`)).isDisplayed()))
-    let chkBoxStatus = await (await this.returnLocation).isDisplayed();
-    //console.log("Same location checkbox status: " + chkBoxStatus);
-    if (!chkBoxStatus) {
-      //await this.click(await this.sameLocationCheckBox)
-      await (await this.sameLocationCheckBox).click();
-    }
 
     //console.log("Return Location");
     await this.click(await this.returnLocation);
@@ -511,7 +508,7 @@ class CarRentalPageObject extends AbstractPage {
     }
 
     if (enabledElements.length >= 1) {
-      await this.clickOnRandomResult(await enabledElements);
+      await this.clickOnRandomResult(enabledElements);
     } else {
       console.log("No checkboxes available");
     }
@@ -519,10 +516,9 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async changeOptions() {
-    
-    await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
     let carList = await this.getCarList();
     this.writeToJsonFile(carList, "results/carList.json");
+    await this.checkboxesHandler(await this.checkBoxesNumOfPeople);
     await this.checkboxesHandler(await this.checkBoxesSuggested);
     await this.checkboxesHandler(await this.checkBoxesLocationType);
     await this.checkboxesHandler(await this.checkBoxesTransmission);
@@ -546,36 +542,57 @@ class CarRentalPageObject extends AbstractPage {
   }
 
   async getCarList() {
-    let cars = await this.carResults;
-    let carDetail, carFeature, features, bonus;
     let carList = [];
+    const totalNumOfCars = parseInt(
+      await (await $(this.selector.totalCars)).getText()
+    );
+    console.log(`Total number of cars: ${totalNumOfCars}`);
+    const nextPage = await $(this.selector.next);
+    let curCarIndex = 0;
+    while (carList.length < totalNumOfCars) {
+      let cars = await this.carResults;
+      let carDetail, carFeature, features, bonus;
 
-    for (let car of cars) {
-      carDetail = await car.$(`.carDetail`);
-      if (await (await carDetail.$(`.bonus`)).isExisting()) {
-        bonus = await (await carDetail.$(`.bonus`)).getText();
-      } else {
-        bonus = "";
+      for (let car of cars) {
+        curCarIndex++;
+        //carDetail = await car.$(`.carDetail`);
+        // if (await (await carDetail.$(`.bonus`)).isExisting()) {
+        //   bonus = await (await carDetail.$(`.bonus`)).getText();
+        // } else {
+        //   bonus = "";
+        // }
+        let carModel = await $(`.carDetail .carModel`).getText();
+        let carType = await $(`.carDetail .carType`).getText();
+        let numOS = carType.split(" ").at(-2);
+        let carObj = {
+          model: carModel,
+          type: carType,
+          seats: numOS,
+          features: [],
+        };
+        //carFeature = await carDetail.$(`.carDetail .carFeatures`);
+        features = await $$(".carDetail .carFeatures.hidden-xs span:nth-of-type(2)");
+        for (let f of features) {
+          carObj.features.push(await f.getText());
+        }
+        // for (let f = 0; f < features.length; f++) {
+        //   let feature = await features[f].getText();
+        //   if (f == 3) {
+        //     feature = feature + " Big case(s)";
+        //   } else if (f == 4) {
+        //     feature = feature + " Small case(s)";
+        //   }
+        //   carObj.features.push(feature);
+        // }
+        carList.push(carObj);
+        console.log(
+          `Almost there, at: ${100 * (curCarIndex / totalNumOfCars)} %`
+        );
       }
-      let carModel = await (await carDetail.$(`.carModel`)).getText();
-      let carType = await (await carDetail.$(`.carType`)).getText();
-      let numOS = carType.split(" ").at(-2);
-      let carObj = {
-        model: carModel,
-        type: carType,
-        seats: numOS,
-        bonus: bonus,
-        features: [],
-      };
-      carFeature = await carDetail.$(`.carFeatures`);
-      features = await carFeature.$$("span:nth-of-type(2)");
-      for (let f of features) {
-        carObj.features.push(await f.getText());
-      }
-      carList.push(carObj);
-      console.log(
-        `Almost there, at: ${100 * ((car.index + 1) / cars.length)} %`
-      );
+      await nextPage.scrollIntoView();
+      if (!(carList.length == totalNumOfCars)) {
+        await this.click(nextPage);
+      } else break;
     }
 
     return carList;

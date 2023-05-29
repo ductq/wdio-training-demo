@@ -22,7 +22,7 @@ Feature: Airport Car Rental
   Scenario Outline: <TestID> - Full flow car rental
     When User enter information
       | Pickup  | Return  | Start date | Start time | End date   | End time | Country   | Age |
-      | Newyork | Newyork | 12-12-2023 | 7:00 am    | 01-01-2024 | 5:00 pm  | Singapore | 45  |
+      | Newyork | Newyork | 12-12-2023 | 7:00 am    | 20-12-2023 | 5:00 pm  | Singapore | 45  |
     When User submit the form
     Then Validate the information after search
     When User change desired options

@@ -46,7 +46,7 @@ class DemoQAPageObject extends AbstractPage {
 
   async assertLink(element) {
     await browser.setupInterceptor();
-    await this.click(element);
+    await element.click();
     let request = await browser.getRequest(0);
     let expectedCode = await (await this.statusCodeFromPage).getText();
     let expectedText = await (await this.statusTextFromPage).getText();

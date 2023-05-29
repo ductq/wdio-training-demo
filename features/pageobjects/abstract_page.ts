@@ -17,12 +17,13 @@ export default class AbstractPage {
 
   //Click on an element
   async click(ele: WebdriverIO.Element) {
-    await ele.waitForExist({ timeout: 5000 });
+    //await ele.waitForClickable({ timeout: 5000 });
+    //await ele.waitForExist({ timeout: 5000 });
     if (!ele.elementId) {
       throw Error(ele.error.message);
     }
     await ele.click();
-    await browser.pause(1300);
+    await browser.pause(1000);
   }
   //Type into an element
   async typeInto(ele: WebdriverIO.Element, text: string) {
@@ -31,7 +32,7 @@ export default class AbstractPage {
       throw Error(ele.error.message);
     }
     await ele.setValue(text);
-    await browser.pause(1300);
+    await browser.pause(1000);
   }
 
   async writeToJsonFile(content: any, filePath: string) {

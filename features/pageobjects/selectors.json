@@ -28,7 +28,10 @@
     "chkBoxRentalCompany": "//*[@data-key='companyid']//div[contains(@class,'pull-left')]/span",
     "chkBoxDamageExcess": "//*[@data-key='excess']//div[contains(@class,'pull-left')]/span",
     "chkBoxPaymentType": "//*[@data-key='paymenttype']//div[contains(@class,'pull-left')]/span",
-    "carResults": "//ul[@class='resultsGroup']/li"
+    "carResults": "//ul[@class='resultsGroup']/li",
+    "totalCars": ".js-total",
+    "next": ".js-prevNext[aria-label='Next']",
+    "prev": ".js-prevNext[aria-label='Previous']"
   },
   "demoqa": {}
 }
