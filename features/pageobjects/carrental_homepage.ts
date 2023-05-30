@@ -122,23 +122,18 @@ class CarRentalPageObject extends AbstractPage {
   get carResults() {
     return $$(this.selector.carResults);
   }
+
+  get ddlResults(){
+    return $$(this.selector.ddlResult);
+  }
   /**
    * End of Selector area
    */
 
   //Click on the first result of the dynamic drop down list
   async clickOnFirstResult() {
-    // await browser.waitUntil(async () =>
-    //   (
-    //     await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
-    //   ).isClickable()
-    // );
-    await (await $$(this.selector.ddlResult))[0].click();
-    //await (await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')).click();
-    // await this.click(
-    //   await $('((//ul[@class="select2-results__options"])[2])//child::li[1]')
-    //   //await $(`[class='select2-results__option'][role='option']:nth-child(1)`)
-    // );
+    await this.click((await this.ddlResults)[0]); 
+
   }
 
   /**
@@ -147,7 +142,7 @@ class CarRentalPageObject extends AbstractPage {
    * @param key (string) matching string
    */
   async processResultDDL(key: string) {
-    let eleList = await $$(this.selector.ddlResult);
+    let eleList = await this.ddlResults;
     if (key === "") {
       //await this.clickOnRandomResult(eleList);
       await this.clickOnFirstResult();
@@ -204,9 +199,6 @@ class CarRentalPageObject extends AbstractPage {
         day = curDate.getDate().toString();
       }
     }
-    // else {
-    //   console.log("The date is today.");
-    // }
 
     //Convert month of the input date to String, eg: 4 -> April
     const monthName = dateObj.toLocaleString("default", { month: "long" });
@@ -550,46 +542,60 @@ class CarRentalPageObject extends AbstractPage {
     const nextPage = await $(this.selector.next);
     let curCarIndex = 0;
     while (carList.length < totalNumOfCars) {
+      let progressionBar = await $(`.progress-bar`);
+      await browser.waitUntil(async () => {
+        let style = await progressionBar.getAttribute("style");
+        console.log(style);
+        return style == "width: 100%;";
+      });
+      await browser.pause(1000);
       let cars = await this.carResults;
-      let carDetail, carFeature, features, bonus;
+      let carDetail, carFeature, featureEles, bonus;
 
       for (let car of cars) {
-        curCarIndex++;
-        //carDetail = await car.$(`.carDetail`);
-        // if (await (await carDetail.$(`.bonus`)).isExisting()) {
-        //   bonus = await (await carDetail.$(`.bonus`)).getText();
-        // } else {
-        //   bonus = "";
-        // }
-        let carModel = await $(`.carDetail .carModel`).getText();
-        let carType = await $(`.carDetail .carType`).getText();
+        carDetail = await car.$(`.carDetail`);
+        if (await (await carDetail.$(`.bonus`)).isExisting()) {
+          bonus = await (await carDetail.$(`.bonus`)).getText();
+        } else {
+          bonus = "";
+        }
+        let carModel = await carDetail.$(`.carModel`).getText();
+        let carType = await carDetail.$(`.carType`).getText();
         let numOS = carType.split(" ").at(-2);
         let carObj = {
           model: carModel,
           type: carType,
           seats: numOS,
+          bonus: bonus,
           features: [],
         };
-        //carFeature = await carDetail.$(`.carDetail .carFeatures`);
-        features = await $$(".carDetail .carFeatures.hidden-xs span:nth-of-type(2)");
-        for (let f of features) {
-          carObj.features.push(await f.getText());
+        carFeature = await carDetail.$(`.carFeatures`);
+        featureEles = await carFeature.$$("span:nth-of-type(2)");
+        let caseCount = 0;
+        for (let f of featureEles) {
+          let feature = await f.getText();
+          if (feature.length == 1) {
+            switch (caseCount) {
+              case 0:
+                feature = feature + " Big case(s)";
+                caseCount++;
+                break;
+              case 1:
+                feature = feature + " Small case(s)";
+                break;
+            }
+          }
+
+          carObj.features.push(feature);
         }
-        // for (let f = 0; f < features.length; f++) {
-        //   let feature = await features[f].getText();
-        //   if (f == 3) {
-        //     feature = feature + " Big case(s)";
-        //   } else if (f == 4) {
-        //     feature = feature + " Small case(s)";
-        //   }
-        //   carObj.features.push(feature);
-        // }
+
         carList.push(carObj);
         console.log(
-          `Almost there, at: ${100 * (curCarIndex / totalNumOfCars)} %`
+          `Almost there, at: ${(100 * (curCarIndex / totalNumOfCars)).toFixed(2)} %`
         );
+        curCarIndex++;
       }
-      await nextPage.scrollIntoView();
+      //await nextPage.scrollIntoView();
       if (!(carList.length == totalNumOfCars)) {
         await this.click(nextPage);
       } else break;
