@@ -123,7 +123,7 @@ class CarRentalPageObject extends AbstractPage {
     return $$(this.selector.carResults);
   }
 
-  get ddlResults(){
+  get ddlResults() {
     return $$(this.selector.ddlResult);
   }
   /**
@@ -131,9 +131,10 @@ class CarRentalPageObject extends AbstractPage {
    */
 
   //Click on the first result of the dynamic drop down list
-  async clickOnFirstResult() {
-    await this.click((await this.ddlResults)[0]); 
-
+  async clickOnFirstResult(eList) {
+    await this.click(await eList[0]);
+    //await this.click(await $(`${this.selector.ddlResult}:nth-of-type(1)`));
+    //await this.waitForDDLClosed();
   }
 
   /**
@@ -145,7 +146,7 @@ class CarRentalPageObject extends AbstractPage {
     let eleList = await this.ddlResults;
     if (key === "") {
       //await this.clickOnRandomResult(eleList);
-      await this.clickOnFirstResult();
+      await this.clickOnFirstResult(eleList);
     } else {
       for (let e of eleList) {
         if ((await e.getText()) === key) {
@@ -154,6 +155,13 @@ class CarRentalPageObject extends AbstractPage {
         }
       }
     }
+  }
+
+  async waitForDDLClosed() {
+    let ddl = await $$(`.locname`);
+    await browser.waitUntil(() => {
+      return !(ddl.length != 0);
+    });
   }
 
   async dropDownListHandler(
@@ -306,18 +314,17 @@ class CarRentalPageObject extends AbstractPage {
       await (await this.sameLocationCheckBox).click();
     }
 
-    await this.click(await this.pickupLocation);
-    await this.dropDownListHandler(
-      await this.pickupLocationField,
-      pLocation,
-      ""
-    );
-
-    //console.log("Return Location");
     await this.click(await this.returnLocation);
     await this.dropDownListHandler(
       await this.returnLocationField,
       rLocation,
+      ""
+    );
+
+    await this.click(await this.pickupLocation);
+    await this.dropDownListHandler(
+      await this.pickupLocationField,
+      pLocation,
       ""
     );
 
@@ -383,7 +390,7 @@ class CarRentalPageObject extends AbstractPage {
 
   async infoCorrectionCheck() {
     //console.log(TestID);
-    await this.waitForBrowserLoading();
+    await this.waitForResultListLoading();
     await expect(await browser.getUrl()).toContain("search");
     //console.log(this.infoToValidate);
     await this.validationCheck(
@@ -463,7 +470,7 @@ class CarRentalPageObject extends AbstractPage {
     console.log("Checkbox: " + chkBoxText);
     if (chkBoxText.includes("People (")) {
       this.numOP = chkBoxText.split(" ").at(0);
-      console.log("Number of people from checkbox: ", this.numOP.trim());
+      //console.log("Number of people from checkbox: ", this.numOP.trim());
     }
     await this.click(chkBox);
   }
@@ -529,8 +536,16 @@ class CarRentalPageObject extends AbstractPage {
         .to.be.at.greaterThanOrEqual(parseInt(this.numOP));
     }
     this.writeToJsonFile(carList, "results/carListAfterFiltered.json");
-    console.log(carList);
     console.log(`${GREEN}>> Finished checking car list! ${DEFAULT}`);
+  }
+
+  async waitForResultListLoading() {
+    let progressionBar = await $(`.progress-bar`);
+    await browser.waitUntil(async () => {
+      let style = await progressionBar.getAttribute("style");
+      return style == "width: 100%;";
+    });
+    await browser.pause(1000);
   }
 
   async getCarList() {
@@ -542,13 +557,7 @@ class CarRentalPageObject extends AbstractPage {
     const nextPage = await $(this.selector.next);
     let curCarIndex = 0;
     while (carList.length < totalNumOfCars) {
-      let progressionBar = await $(`.progress-bar`);
-      await browser.waitUntil(async () => {
-        let style = await progressionBar.getAttribute("style");
-        console.log(style);
-        return style == "width: 100%;";
-      });
-      await browser.pause(1000);
+      await this.waitForResultListLoading();
       let cars = await this.carResults;
       let carDetail, carFeature, featureEles, bonus;
 
@@ -589,9 +598,9 @@ class CarRentalPageObject extends AbstractPage {
           carObj.features.push(feature);
         }
 
-        carList.push(carObj);
         console.log(
-          `Almost there, at: ${(100 * (curCarIndex / totalNumOfCars)).toFixed(2)} %`
+          `Getting cars info: 
+          ${(100 * (curCarIndex / totalNumOfCars)).toFixed(2)} %`
         );
         curCarIndex++;
       }

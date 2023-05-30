@@ -23,7 +23,7 @@ export default class AbstractPage {
       throw Error(ele.error.message);
     }
     await ele.click();
-    await browser.pause(1000);
+    await browser.pause(500);
   }
   //Type into an element
   async typeInto(ele: WebdriverIO.Element, text: string) {
@@ -117,7 +117,6 @@ export default class AbstractPage {
 
   getSelectors() {
     const selectorsFilePath = path.resolve(process.cwd(), './features/pageobjects/selectors.json');
-    console.log(selectorsFilePath)
     const selectors = JSON.parse(fs.readFileSync(selectorsFilePath).toString());
     return selectors;    
   }

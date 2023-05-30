@@ -40,9 +40,9 @@ When(
 
 When(/^User enter information$/, async function (dataTable) {
   const data = dataTable.rawTable.slice(1);
-  console.log(dataTable.rows());
-  console.log(dataTable.raw());
-  console.log(dataTable.hashes());
+  // console.log(dataTable.rows());
+  // console.log(dataTable.raw());
+  // console.log(dataTable.hashes());
   for (let i = 0; i < data.length; i++) {
     const [
       pickupLocation,
