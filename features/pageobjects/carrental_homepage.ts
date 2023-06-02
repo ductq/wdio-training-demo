@@ -8,7 +8,7 @@ import AbstractPage from "./abstract_page.js";
  */
 class CarRentalPageObject extends AbstractPage {
   infoToValidate: any;
-  carObj;
+  carObj: any;
   booleanED: boolean;
   numOP: string;
   selector;
@@ -21,7 +21,7 @@ class CarRentalPageObject extends AbstractPage {
       pLocation: "",
       rLocation: "",
       sDate: "",
-      sTime: "any",
+      sTime: "",
       eDate: "",
       eTime: "",
       country: "",
@@ -35,7 +35,7 @@ class CarRentalPageObject extends AbstractPage {
         tier: "",
         numOfReviews: "",
         badge: "",
-        carType: ""
+        carType: "",
       },
       details: {
         model: "",
@@ -554,7 +554,7 @@ class CarRentalPageObject extends AbstractPage {
     console.log("Checking results after filtering!");
     for (const car of carList) {
       chai
-        .expect(parseInt(car.seats))
+        .expect(parseInt(car.details.seats))
         .to.be.at.greaterThanOrEqual(parseInt(this.numOP));
     }
     this.writeToJsonFile(carList, "results/carListAfterFiltered.json");
@@ -572,12 +572,12 @@ class CarRentalPageObject extends AbstractPage {
 
   async getCarPhoto(car) {
     const carPhoto = await car.$(`.carPhoto`);
-    const supplier = await carPhoto.$(`.itemLogo`).getAttribute(`title`);
-    const ratingScore = await carPhoto.$(`.rating_score-number`).getText();
-    const scoreTier = await carPhoto.$(`.score-tier_label`).getText();
-    const numOfReviews = await carPhoto.$(`.score-tier_desc`).getText();
-    const badge = await carPhoto.$(`.badge-content`).getText();
-    const carType = await carPhoto.$(`.carTypeLink`).getText();
+    const supplier = await (await carPhoto.$(`.itemLogo`)).getAttribute(`title`);
+    const ratingScore = await (await carPhoto.$(`.rating_score-number`)).getText();
+    const scoreTier = await (await carPhoto.$(`.score-tier_label`)).getText();
+    const numOfReviews = await (await carPhoto.$(`.score-tier_desc`)).getText();
+    const badge = await (await carPhoto.$(`.badge-content`)).getAttribute(`title`);
+    const carType = await (await carPhoto.$(`.carTypeLink`)).getText();
     this.carObj.headlines.supplier = supplier;
     this.carObj.headlines.rating = ratingScore;
     this.carObj.headlines.tier = scoreTier;
@@ -588,20 +588,20 @@ class CarRentalPageObject extends AbstractPage {
 
   async getCarPrice(car) {
     const carPrice = await car.$(`.carPrice`);
-    const currencyTotal = await carPrice
-      .$(`div.js-price-in-money span.currency`)
+    const currencyTotal = await (await carPrice
+      .$(`div.js-price-in-money span.currency`))
       .getText();
-    const priceTotal = await carPrice
-      .$(`div.js-price-in-money span.price`)
+    const priceTotal = await (await carPrice
+      .$(`div.js-price-in-money span.price`))
       .getText();
-    const currencyPerDay = await carPrice
-      .$(`span.js-price-in-money span.currency`)
+    const currencyPerDay = await (await carPrice
+      .$(`span.js-price-in-money span.currency`))
       .getText();
-    const pricePerDay = await carPrice
-      .$(`span.js-price-in-money span.price`)
+    const pricePerDay = await (await carPrice
+      .$(`span.js-price-in-money span.price`))
       .getText();
-      this.carObj.price.total = priceTotal + currencyTotal;
-      this.carObj.price.perDay = pricePerDay + currencyPerDay;
+    this.carObj.price.total = `${priceTotal} ${currencyTotal}`;
+    this.carObj.price.perDay = `${pricePerDay} ${currencyPerDay}`;
   }
 
   async getCarDetail(car) {
@@ -612,8 +612,8 @@ class CarRentalPageObject extends AbstractPage {
     } else {
       bonus = "";
     }
-    let carModel = await carDetail.$(`.carModel`).getText();
-    let carType = await carDetail.$(`.carType`).getText();
+    let carModel =await (await carDetail.$(`.carModel`)).getText();
+    let carType = await (await carDetail.$(`.carType`)).getText();
     let numOS = carType.split(" ").at(-2);
     const carFeature = await carDetail.$(`.carFeatures`);
     const featureEles = await carFeature.$$("span:nth-of-type(2)");
@@ -625,7 +625,7 @@ class CarRentalPageObject extends AbstractPage {
 
     let caseCount = 0;
     for (let f of featureEles) {
-      let feature = await f.getText();
+      let feature = await (await f).getText();
       if (feature.length == 1) {
         switch (caseCount) {
           case 0:
@@ -641,6 +641,30 @@ class CarRentalPageObject extends AbstractPage {
     }
   }
 
+  resetCarObj(){
+    this.carObj = {
+      headlines: {
+        supplier: "",
+        rating: "",
+        tier: "",
+        numOfReviews: "",
+        badge: "",
+        carType: "",
+      },
+      details: {
+        model: "",
+        type: "",
+        seats: "",
+        bonus: "",
+        features: [],
+      },
+      price: {
+        total: "",
+        perDay: "",
+      },
+    };
+  }
+
   async getCarList() {
     let carList = [];
     const totalNumOfCars = parseInt(
@@ -652,57 +676,23 @@ class CarRentalPageObject extends AbstractPage {
     while (carList.length < totalNumOfCars) {
       await this.waitForResultListLoading();
       let cars = await this.carResults;
-      let carDetail, carPhoto, carPrice, carFeature, featureEles, bonus;
 
       for (let car of cars) {
-        carPhoto = await car.$(`.carPhoto`);
-        carDetail = await car.$(`.carDetail`);
-        carPrice = await car.$(`.carPrice`);
-        if (await (await carDetail.$(`.bonus`)).isExisting()) {
-          bonus = await (await carDetail.$(`.bonus`)).getText();
-        } else {
-          bonus = "";
-        }
-        let carModel = await carDetail.$(`.carModel`).getText();
-        let carType = await carDetail.$(`.carType`).getText();
-        let numOS = carType.split(" ").at(-2);
-        let carObj = {
-          model: carModel,
-          type: carType,
-          seats: numOS,
-          bonus: bonus,
-          features: [],
-        };
-        carFeature = await carDetail.$(`.carFeatures`);
-        featureEles = await carFeature.$$("span:nth-of-type(2)");
-        let caseCount = 0;
-        for (let f of featureEles) {
-          let feature = await f.getText();
-          if (feature.length == 1) {
-            switch (caseCount) {
-              case 0:
-                feature = feature + " Big case(s)";
-                caseCount++;
-                break;
-              case 1:
-                feature = feature + " Small case(s)";
-                break;
-            }
-          }
-
-          carObj.features.push(feature);
-        }
-
+        await this.getCarPhoto(car);
+        await this.getCarDetail(car);
+        await this.getCarPrice(car);
         console.log(
-          `Getting cars info: 
-          ${(100 * (curCarIndex / totalNumOfCars)).toFixed(2)} %`
+          `Getting cars info: ${(100 * (curCarIndex / totalNumOfCars)).toFixed(2)} %`
         );
         curCarIndex++;
+        carList.push(this.carObj);
+        this.resetCarObj();
       }
       //await nextPage.scrollIntoView();
       if (!(carList.length == totalNumOfCars)) {
         await this.click(nextPage);
-      } else break;
+      } 
+      else break;
     }
 
     return carList;
