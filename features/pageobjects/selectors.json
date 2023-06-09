@@ -31,7 +31,8 @@
     "carResults": "//ul[@class='resultsGroup']/li",
     "totalCars": ".js-total",
     "next": ".js-prevNext[aria-label='Next']",
-    "prev": ".js-prevNext[aria-label='Previous']"
+    "prev": ".js-prevNext[aria-label='Previous']",
+    "avgCarPrice": ".price-desc"
   },
   "demoqa": {}
 }

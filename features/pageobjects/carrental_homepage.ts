@@ -148,6 +148,7 @@ class CarRentalPageObject extends AbstractPage {
   get ddlResults() {
     return $$(this.selector.ddlResult);
   }
+
   /**
    * End of Selector area
    */
@@ -407,7 +408,7 @@ class CarRentalPageObject extends AbstractPage {
       (this.infoToValidate.age = await (await this.age).getValue()),
       //console.log(this.infoToValidate.age)
       //console.log(this.infoToValidate);
-      await this.submitBtn.click();
+      await this.click(await this.submitBtn);
   }
 
   async infoCorrectionCheck() {
@@ -547,6 +548,10 @@ class CarRentalPageObject extends AbstractPage {
     await this.checkboxesHandler(await this.checkBoxesRentalCompany);
     await this.checkboxesHandler(await this.checkBoxesDamageExcess);
     await this.checkboxesHandler(await this.checkBoxesPaymentType);
+    const fullAvgPriceText = await (await $(this.selector.avgCarPrice)).getText()
+    const avgPriceText = fullAvgPriceText.split(" ").at(-1)
+    const avgPrice = parseInt(avgPriceText) - 1;
+
   }
 
   async validateCarListingResult() {
@@ -576,7 +581,7 @@ class CarRentalPageObject extends AbstractPage {
     const ratingScore = await (await carPhoto.$(`.rating_score-number`)).getText();
     const scoreTier = await (await carPhoto.$(`.score-tier_label`)).getText();
     const numOfReviews = await (await carPhoto.$(`.score-tier_desc`)).getText();
-    const badge = await (await carPhoto.$(`.badge-content`)).getAttribute(`title`);
+    const badge = await (await carPhoto.$(`.badge-content`)).getText();
     const carType = await (await carPhoto.$(`.carTypeLink`)).getText();
     this.carObj.headlines.supplier = supplier;
     this.carObj.headlines.rating = ratingScore;
